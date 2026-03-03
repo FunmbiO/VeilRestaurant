@@ -224,5 +224,4 @@ classDiagram
     %% Repository Dependencies
     EventRepository --> Event : persists
     UserRepository --> User : persists
-
 ```
