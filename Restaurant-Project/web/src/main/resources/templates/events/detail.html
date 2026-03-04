@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${event.name} + ' - Pop-Up Restaurant'">Event Detail</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">Pop-Up Restaurant</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/events">Events</a></li>
+                <li class="nav-item"><a class="nav-link" href="/events/new">Create Event</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Success message (shown after create redirect) -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="mb-3">
+        <a href="/events" class="btn btn-outline-secondary btn-sm">&larr; Back to Events</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0" th:text="${event.name}">Event Name</h3>
+            <span th:if="${event.active}" class="badge bg-success fs-6">Active</span>
+            <span th:unless="${event.active}" class="badge bg-secondary fs-6">Inactive</span>
+        </div>
+        <div class="card-body">
+
+            <!-- Description -->
+            <div class="mb-4" th:if="${event.description != null and !event.description.isEmpty()}">
+                <h6 class="text-muted text-uppercase small">Description</h6>
+                <p th:text="${event.description}" class="mb-0"></p>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase small">Start Date</h6>
+                    <p th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase small">End Date</h6>
+                    <p th:text="${#temporals.format(event.endDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                </div>
+                <div class="col-md-6" th:if="${event.durationMinutes != null}">
+                    <h6 class="text-muted text-uppercase small">Duration</h6>
+                    <p th:text="${event.durationMinutes + ' minutes'}" class="mb-0"></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase small">Price</h6>
+                    <p th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}" class="mb-0"></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase small">Created Date</h6>
+                    <p th:text="${#temporals.format(event.createdDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted text-uppercase small">Last Updated</h6>
+                    <p th:text="${#temporals.format(event.updatedDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
