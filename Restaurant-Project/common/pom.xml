@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
 <!--        You will want to fix the parent here-->
-        <groupId>nbcc.musiclibrary</groupId>
-        <artifactId>MusicLibrary</artifactId>
+        <groupId>nbcc.resto</groupId>
+        <artifactId>Restaurant-Project</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
