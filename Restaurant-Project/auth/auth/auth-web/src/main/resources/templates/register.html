@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link th:replace="~{partial :: bootstrap}"/>
+</head>
+<body>
+<div th:insert="~{nav :: navbar}"></div>
+<div class="container">
+    <main role="main" class="pb-3">
+        <h1>Register</h1>
+        <h4>User</h4>
+        <hr/>
+        <div th:unless="${message == null}" class="alert alert-warning" th:text="${message}"></div>
+
+        <!--/*@thymesVar id="user" type="nbcc.auth.domain.UserRegistration"*/-->
+        <form method="post" th:action="@{/register}" th:object="${user}">
+            <div>
+                <div class="form-group">
+                    <label class="form-label">User Name:
+                        <input th:field="*{username}" class="form-control"/>
+                    </label>
+                    <div class="alert alert-warning" th:errors="*{username}"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email:
+                        <input th:field="*{email}" class="form-control"/>
+                    </label>
+                    <div class="alert alert-warning" th:errors="*{email}"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password:
+                        <input th:field="*{password}" type="password" class="form-control"/>
+                    </label>
+                    <div class="alert alert-warning" th:errors="*{password}"></div>
+                </div>
+            </div>
+            <input type="submit" value="Register" class="btn btn-primary"/>
+        </form>
+    </main>
+</div>
+</body>
+</html>

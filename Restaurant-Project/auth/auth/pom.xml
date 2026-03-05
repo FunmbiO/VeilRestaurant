@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <!--        You will want to fix the parent here-->
+        <groupId>nbcc.resto</groupId>
+        <artifactId>Restaurant-Project</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>nbcc.auth</groupId>
+    <artifactId>auth</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>auth-web</module>
+        <module>auth-client</module>
+        <module>auth-rest-api</module>
+        <module>auth-persistence</module>
+        <module>auth-domain</module>
+        <module>auth-application-token-service</module>
+        <module>auth-application-service</module>
+        <module>auth-application-client</module>
+        <module>auth-application-api</module>
+        <module>auth-application-token-validator</module>
+        <module>auth-application-token-signer</module>
+
+
+    </modules>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>
