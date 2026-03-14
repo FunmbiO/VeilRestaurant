@@ -45,4 +45,14 @@ public class EventRepositoryAdapter implements EventRepository {
     public boolean existsByName(String name) {
         return jpaRepository.existsByName(name);
     }
+
+    @Override
+    public void deleteById(Long id) {
+
+    }
+
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return false;
+    }
 }
