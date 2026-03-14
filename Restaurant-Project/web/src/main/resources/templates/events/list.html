@@ -16,6 +16,16 @@
         <a href="/events/new" class="btn btn-dark">+ Create Event</a>
     </div>
 
+    <!-- Success / Error flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <!-- Empty state -->
     <div th:if="${#lists.isEmpty(events)}" class="alert alert-secondary text-center py-5">
         <p class="mb-2">No events found.</p>
@@ -32,6 +42,7 @@
                 <th>End Date</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th class="text-center">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -47,6 +58,20 @@
                 <td>
                     <span th:if="${event.active}" class="badge bg-success">Active</span>
                     <span th:unless="${event.active}" class="badge bg-secondary">Inactive</span>
+                </td>
+                <td class="text-center">
+                    <!-- Edit button -->
+                    <a th:href="@{/events/{id}/edit(id=${event.id})}"
+                       class="btn btn-outline-dark btn-sm me-1"
+                       title="Edit Event">
+                        &#9998; Edit
+                    </a>
+                    <!-- Delete/Archive button -->
+                    <a th:href="@{/events/{id}/delete-confirm(id=${event.id})}"
+                       class="btn btn-outline-danger btn-sm"
+                       title="Delete or Archive Event">
+                        &#128465; Delete
+                    </a>
                 </td>
             </tr>
             </tbody>
