@@ -10,4 +10,10 @@ public interface EventRepository {
     Optional<Event> findByName(String name);
     List<Event> findAllActive();
     boolean existsByName(String name);
+
+    // US5 - Delete/Archive
+    void deleteById(Long id);
+
+    // US6 - Update: check name uniqueness excluding the current event
+    boolean existsByNameAndIdNot(String name, Long id);
 }
