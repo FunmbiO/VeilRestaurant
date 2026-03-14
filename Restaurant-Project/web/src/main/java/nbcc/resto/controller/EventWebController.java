@@ -28,14 +28,14 @@ public class EventWebController {
 
     // US5 - Delete / Archive Event
 
-    @GetMapping("/{id}/delete-confirm")
+    @GetMapping("/{id}/delete")
     public String showDeleteConfirm(@PathVariable Long id, Model model) {
         try {
             EventDTO event = eventService.getEventById(id);
             boolean willBeArchived = eventService.isEventInPast(id);
             model.addAttribute("event", event);
             model.addAttribute("willBeArchived", willBeArchived);
-            return "delete";
+            return "events/delete";
         } catch (EventNotFoundException e) {
             return "redirect:/events?error=notfound";
         }
