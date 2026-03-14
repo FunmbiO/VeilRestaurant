@@ -10,4 +10,5 @@ public interface EventJpaRepository extends JpaRepository<EventJpaEntity, Long> 
     Optional<EventJpaEntity> findByName(String name);
     boolean existsByName(String name);
     List<EventJpaEntity> findByActiveTrueOrderByStartDateAsc();
+    boolean existsByNameAndIdNot(String name, Long id);
 }

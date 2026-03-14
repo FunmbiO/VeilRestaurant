@@ -8,27 +8,17 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Pop-Up Restaurant</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/events">Events</a></li>
-                <li class="nav-item"><a class="nav-link" href="/events/new">Create Event</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<div th:replace="~{nav :: navbar}"></div>
 
 <div class="container mt-4">
 
-    <!-- Success message (shown after create redirect) -->
+    <!-- Success / Error messages -->
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
@@ -39,8 +29,20 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0" th:text="${event.name}">Event Name</h3>
-            <span th:if="${event.active}" class="badge bg-success fs-6">Active</span>
-            <span th:unless="${event.active}" class="badge bg-secondary fs-6">Inactive</span>
+            <div class="d-flex align-items-center gap-2">
+                <span th:if="${event.active}" class="badge bg-success fs-6">Active</span>
+                <span th:unless="${event.active}" class="badge bg-secondary fs-6">Inactive</span>
+                <!-- Edit button -->
+                <a th:href="@{/events/{id}/edit(id=${event.id})}"
+                   class="btn btn-outline-dark btn-sm">
+                    &#9998; Edit
+                </a>
+                <!-- Delete/Archive button -->
+                <a th:href="@{/events/{id}/delete(id=${event.id})}"
+                   class="btn btn-outline-danger btn-sm">
+                    &#128465; Delete
+                </a>
+            </div>
         </div>
         <div class="card-body">
 

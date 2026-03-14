@@ -9,6 +9,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import nbcc.resto.entity.Event;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -58,6 +60,39 @@ public class EventJpaEntity {
         updatedDate = LocalDateTime.now();
     }
 
+    // Mapping methods
+
+    public Event toDomain() {
+        Event event = new Event();
+        event.setId(this.id);
+        event.setName(this.name);
+        event.setDescription(this.description);
+        event.setStartDate(this.startDate);
+        event.setEndDate(this.endDate);
+        event.setDurationMinutes(this.durationMinutes);
+        event.setPrice(this.price);
+        event.setActive(this.active);
+        event.setCreatedDate(this.createdDate);
+        event.setUpdatedDate(this.updatedDate);
+        return event;
+    }
+
+    public static EventJpaEntity fromDomain(Event event) {
+        EventJpaEntity entity = new EventJpaEntity();
+        entity.setId(event.getId());
+        entity.setName(event.getName());
+        entity.setDescription(event.getDescription());
+        entity.setStartDate(event.getStartDate());
+        entity.setEndDate(event.getEndDate());
+        entity.setDurationMinutes(event.getDurationMinutes());
+        entity.setPrice(event.getPrice());
+        entity.setActive(event.isActive());
+        entity.setCreatedDate(event.getCreatedDate());
+        entity.setUpdatedDate(event.getUpdatedDate());
+        return entity;
+    }
+
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
