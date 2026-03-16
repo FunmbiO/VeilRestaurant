@@ -3,86 +3,183 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${event.name} + ' - Pop-Up Restaurant'">Event Detail</title>
+    <title th:text="${event.name} + ' — Veil'">Event Detail — Veil</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        .detail-hero {
+            background: linear-gradient(135deg, #0e0e0c 0%, #1a1a14 100%);
+            border-bottom: 0.5px solid rgba(201,168,76,0.12);
+            padding: 3.5rem 0 2.5rem;
+            position: relative; overflow: hidden;
+        }
+        .detail-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 60%);
+        }
+        .detail-hero-content { position: relative; z-index: 1; }
+        .detail-event-name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 700; line-height: 1.05; color: var(--cream);
+        }
+        .detail-meta {
+            display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem;
+        }
+        .detail-meta-item {
+            font-size: 0.72rem; color: var(--cream-dim);
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .detail-meta-item strong { color: var(--cream); font-weight: 400; }
+
+        .detail-price-badge {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; color: var(--gold); font-weight: 500;
+        }
+
+        /* Info grid */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2rem; }
+        .info-cell {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.08);
+            padding: 1.4rem 1.6rem;
+        }
+
+        /* Description section */
+        .detail-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem; font-weight: 300; color: var(--cream-dim);
+            line-height: 1.8; font-style: italic;
+            border-left: 2px solid var(--gold-dim);
+            padding-left: 1.4rem; margin: 2rem 0;
+        }
+
+        /* Timestamps */
+        .timestamps {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2rem;
+        }
+        .ts-cell {
+            background: var(--charcoal);
+            border: 0.5px solid rgba(201,168,76,0.06);
+            padding: 1rem 1.2rem;
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<div class="container mt-4">
-
-    <!-- Success / Error messages -->
-    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+<!-- Flash messages -->
+<div class="container mt-3">
+    <div th:if="${successMessage}" class="alert veil-alert success alert-dismissible fade show" role="alert">
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div th:if="${errorMessage}" class="alert veil-alert error alert-dismissible fade show" role="alert">
         <span th:text="${errorMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+</div>
 
-    <div class="mb-3">
-        <a href="/events" class="btn btn-outline-secondary btn-sm">&larr; Back to Events</a>
-    </div>
+<!-- Detail hero -->
+<div class="detail-hero">
+    <div class="container detail-hero-content">
+        <!-- Breadcrumb -->
+        <div class="mb-3">
+            <a href="/events" class="btn btn-veil-sm back">← Back to Events</a>
+        </div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0" th:text="${event.name}">Event Name</h3>
-            <div class="d-flex align-items-center gap-2">
-                <span th:if="${event.active}" class="badge bg-success fs-6">Active</span>
-                <span th:unless="${event.active}" class="badge bg-secondary fs-6">Inactive</span>
-                <!-- Edit button -->
-                <a th:href="@{/events/{id}/edit(id=${event.id})}"
-                   class="btn btn-outline-dark btn-sm">
-                    &#9998; Edit
-                </a>
-                <!-- Delete/Archive button -->
-                <a th:href="@{/events/{id}/delete-confirm(id=${event.id})}"
-                   class="btn btn-outline-danger btn-sm">
-                    &#128465; Delete
-                </a>
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+            <div>
+                <span class="veil-eyebrow">Event Detail</span>
+                <h1 class="detail-event-name" th:text="${event.name}">Event Name</h1>
+                <div class="detail-meta">
+                    <div class="detail-meta-item">
+                        <strong th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy · HH:mm')}"></strong>
+                    </div>
+                    <div class="detail-meta-item" th:if="${event.durationMinutes != null}">
+                        · <strong th:text="${event.durationMinutes + ' min'}"></strong>
+                    </div>
+                    <div class="detail-meta-item">
+                        ·
+                        <span th:if="${event.active}" class="veil-badge badge active">Active</span>
+                        <span th:unless="${event.active}" class="veil-badge badge inactive">Inactive</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="detail-price-badge" th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></div>
+                <div style="font-size:0.6rem; letter-spacing:0.12em; color:var(--cream-dim); text-transform:uppercase;">per person</div>
+                <div class="d-flex gap-2 mt-3 justify-content-end">
+                    <a th:href="@{/events/{id}/edit(id=${event.id})}"
+                       class="btn btn-veil-sm edit">✎ Edit</a>
+                    <a th:href="@{/events/{id}/delete(id=${event.id})}"
+                       class="btn btn-veil-sm danger">⊘ Delete</a>
+                </div>
             </div>
         </div>
-        <div class="card-body">
+    </div>
+</div>
+
+<!-- Detail body -->
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
 
             <!-- Description -->
-            <div class="mb-4" th:if="${event.description != null and !event.description.isEmpty()}">
-                <h6 class="text-muted text-uppercase small">Description</h6>
-                <p th:text="${event.description}" class="mb-0"></p>
+            <div th:if="${event.description != null and !event.description.isEmpty()}">
+                <span class="veil-eyebrow">About this evening</span>
+                <blockquote class="detail-desc" th:text="${event.description}"></blockquote>
             </div>
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <h6 class="text-muted text-uppercase small">Start Date</h6>
-                    <p th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+            <hr class="veil-rule">
+
+            <!-- Info grid -->
+            <span class="veil-eyebrow">Event details</span>
+            <div class="info-grid">
+                <div class="info-cell">
+                    <span class="veil-field-label">Start Date</span>
+                    <span class="veil-field-value"
+                          th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy HH:mm')}"></span>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="text-muted text-uppercase small">End Date</h6>
-                    <p th:text="${#temporals.format(event.endDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                <div class="info-cell">
+                    <span class="veil-field-label">End Date</span>
+                    <span class="veil-field-value"
+                          th:text="${#temporals.format(event.endDate, 'MMMM dd, yyyy HH:mm')}"></span>
                 </div>
-                <div class="col-md-6" th:if="${event.durationMinutes != null}">
-                    <h6 class="text-muted text-uppercase small">Duration</h6>
-                    <p th:text="${event.durationMinutes + ' minutes'}" class="mb-0"></p>
+                <div class="info-cell" th:if="${event.durationMinutes != null}">
+                    <span class="veil-field-label">Duration</span>
+                    <span class="veil-field-value" th:text="${event.durationMinutes + ' minutes'}"></span>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="text-muted text-uppercase small">Price</h6>
-                    <p th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}" class="mb-0"></p>
+                <div class="info-cell">
+                    <span class="veil-field-label">Price</span>
+                    <span class="veil-field-value"
+                          th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></span>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="text-muted text-uppercase small">Created Date</h6>
-                    <p th:text="${#temporals.format(event.createdDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="timestamps mt-2">
+                <div class="ts-cell">
+                    <span class="veil-field-label">Created</span>
+                    <span class="veil-field-value" style="font-size:0.82rem;"
+                          th:text="${#temporals.format(event.createdDate, 'MMMM dd, yyyy HH:mm')}"></span>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="text-muted text-uppercase small">Last Updated</h6>
-                    <p th:text="${#temporals.format(event.updatedDate, 'MMMM dd, yyyy HH:mm')}" class="mb-0"></p>
+                <div class="ts-cell">
+                    <span class="veil-field-label">Last Updated</span>
+                    <span class="veil-field-value" style="font-size:0.82rem;"
+                          th:text="${#temporals.format(event.updatedDate, 'MMMM dd, yyyy HH:mm')}"></span>
                 </div>
             </div>
 
         </div>
     </div>
-
 </div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
