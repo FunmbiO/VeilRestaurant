@@ -28,12 +28,6 @@ public class EventViewController {
         this.eventService = eventService;
     }
 
-    // HOME PAGE  GET /
-    @GetMapping("/")
-    public String home() {
-        return "home";
-    }
-
     // LIST EVENTS  GET /events
     @GetMapping("/events")
     public String listEvents(Model model) {
