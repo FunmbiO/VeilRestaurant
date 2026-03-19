@@ -3,6 +3,7 @@ package nbcc.resto.controller;
 import jakarta.validation.Valid;
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
+import nbcc.resto.dto.EventSearchCriteria;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.service.EventService;
 import org.springframework.stereotype.Controller;
@@ -30,10 +31,25 @@ public class EventViewController {
 
     // LIST EVENTS  GET /events
     @GetMapping("/events")
-    public String listEvents(Model model) {
-        List<EventDTO> events = eventService.getAllActiveEvents();
+    public String listEvents(@ModelAttribute EventSearchCriteria criteria, Model model) {
+        boolean searchActive = isSearchActive(criteria);
+        List<EventDTO> events = searchActive
+                ? eventService.searchEvents(criteria)
+                : eventService.getAllActiveEvents();
+
         model.addAttribute("events", events);
+        model.addAttribute("criteria", criteria);
+        model.addAttribute("searchActive", searchActive);
+        model.addAttribute("resultCount", events.size());
         return "events/list";
+    }
+
+    private boolean isSearchActive(EventSearchCriteria criteria) {
+        boolean hasName = criteria.getName() != null && !criteria.getName().isBlank();
+        boolean hasDate = criteria.getStartDate() != null || criteria.getEndDate() != null;
+        boolean hasFilter = criteria.getDateRangeFilter() != null
+                && !criteria.getDateRangeFilter().equals("ALL");
+        return hasName || hasDate || hasFilter;
     }
 
     // EVENT DETAIL  GET /events/{id}
