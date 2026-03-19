@@ -2,6 +2,7 @@ package nbcc.resto.service;
 
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
+import nbcc.resto.dto.EventSearchCriteria;
 import nbcc.resto.dto.UpdateEventRequest;
 import nbcc.resto.entity.Event;
 import nbcc.resto.exception.DuplicateEventNameException;
@@ -80,9 +81,8 @@ public class EventService {
         return EventDTO.from(event);
     }
 
-    // -------------------------------------------------------------------------
     // US5 - Delete / Archive Event
-    // -------------------------------------------------------------------------
+
 
     @Transactional(readOnly = true)
     public boolean isEventInPast(Long id) {
@@ -109,9 +109,8 @@ public class EventService {
         return isPast;
     }
 
-    // -------------------------------------------------------------------------
     // US6 - Update / Edit Event
-    // -------------------------------------------------------------------------
+
 
     @Transactional
     public EventDTO updateEvent(Long id, UpdateEventRequest request) {
@@ -161,5 +160,43 @@ public class EventService {
         event.setUpdatedDate(LocalDateTime.now());
 
         return EventDTO.from(eventRepository.save(event));
+    }
+    // US7 - Search Events
+
+
+    @Transactional(readOnly = true)
+    public List<EventDTO> searchEvents(EventSearchCriteria criteria) {
+
+        // Treat blank name as "no name filter"
+        String name = (criteria.getName() == null || criteria.getName().isBlank())
+                ? null
+                : criteria.getName().trim();
+
+        LocalDateTime from = null;
+        LocalDateTime to   = null;
+
+        if (criteria.getDateRangeFilter() != null) {
+            switch (criteria.getDateRangeFilter()) {
+                case "AFTER":
+                    // Events starting after the given startDate
+                    from = criteria.getStartDate();
+                    break;
+                case "BEFORE":
+                    // Events starting before the given startDate
+                    to = criteria.getStartDate();
+                    break;
+                case "BETWEEN":
+                    from = criteria.getStartDate();
+                    to   = criteria.getEndDate();
+                    break;
+                default: // "ALL" — no date filtering
+                    break;
+            }
+        }
+
+        return eventRepository.searchEvents(name, from, to)
+                .stream()
+                .map(EventDTO::from)
+                .collect(Collectors.toList());
     }
 }
