@@ -23,6 +23,35 @@
             line-height: 1.65; max-width: 360px;
         }
 
+        /* Search section */
+        .search-section {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.15);
+            padding: 1.8rem 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .search-section-title {
+            font-size: 0.55rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            display: block;
+            margin-bottom: 1.2rem;
+        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.6) sepia(1) saturate(0.5) hue-rotate(5deg);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+        .search-result-count {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--cream-dim);
+            margin-bottom: 1.5rem;
+        }
+        .search-result-count span { color: var(--gold); }
+
         /* Empty state */
         .empty-state {
             background: var(--off-black);
@@ -35,7 +64,7 @@
         }
         .empty-state p { font-size: 0.85rem; color: var(--cream-dim); margin-bottom: 1.5rem; }
 
-        /* Event cards grid */
+        /* Event cards */
         .event-card-item {
             background: var(--off-black);
             border: 0.5px solid rgba(201,168,76,0.1);
@@ -58,7 +87,7 @@
             font-family: 'Playfair Display', serif; font-size: 1.2rem;
             font-weight: 400; color: var(--cream); text-decoration: none !important;
             display: block; margin-bottom: 0.3rem; transition: color 0.2s;
-        }  
+        }
         .event-card-name:hover { color: var(--gold) !important; }
         .event-card-footer-strip {
             display: flex; justify-content: space-between; align-items: center;
@@ -76,7 +105,7 @@
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<!-- Page hero -->
+<!-- Hero -->
 <div class="events-hero">
     <div class="container d-flex justify-content-between align-items-end flex-wrap gap-3">
         <div>
@@ -102,8 +131,79 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Empty state -->
-    <div th:if="${#lists.isEmpty(events)}" class="empty-state">
+    <!-- Search Section -->
+    <div class="search-section">
+        <span class="search-section-title">Search Events</span>
+        <form th:action="@{/events}" th:object="${criteria}" method="get">
+            <div class="row g-3 align-items-end">
+
+                <!-- Name -->
+                <div class="col-md-4">
+                    <label class="veil-label" for="name">Event Name</label>
+                    <input type="text"
+                           id="name"
+                           th:field="*{name}"
+                           class="form-control veil-input"
+                           placeholder="Search by name…"/>
+                </div>
+
+                <!-- Date range filter -->
+                <div class="col-md-3">
+                    <label class="veil-label" for="dateRangeFilter">Date Filter</label>
+                    <select id="dateRangeFilter"
+                            th:field="*{dateRangeFilter}"
+                            class="form-select veil-input"
+                            onchange="toggleDateInputs(this.value)">
+                        <option value="ALL">All Dates</option>
+                        <option value="AFTER">After a Date</option>
+                        <option value="BEFORE">Before a Date</option>
+                        <option value="BETWEEN">Between Two Dates</option>
+                    </select>
+                </div>
+
+                <!-- Date inputs (shown/hidden by JS) -->
+                <div class="col-md-5" id="dateInputsWrapper" style="display:none;">
+                    <div class="row g-2">
+                        <div class="col" id="startDateCol">
+                            <label class="veil-label" id="startDateLabel" for="startDate">Start Date</label>
+                            <input type="datetime-local"
+                                   id="startDate"
+                                   th:field="*{startDate}"
+                                   class="form-control veil-input"/>
+                        </div>
+                        <div class="col" id="endDateCol" style="display:none;">
+                            <label class="veil-label" for="endDate">End Date</label>
+                            <input type="datetime-local"
+                                   id="endDate"
+                                   th:field="*{endDate}"
+                                   class="form-control veil-input"/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-veil-primary">Search</button>
+                <a href="/events" class="btn btn-veil-ghost">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Result count -->
+    <p th:if="${searchActive}" class="search-result-count">
+        <span th:text="${resultCount}"></span> result<span th:if="${resultCount != 1}">s</span> found
+    </p>
+
+    <!-- Empty: no search results -->
+    <div th:if="${#lists.isEmpty(events) and searchActive}" class="empty-state">
+        <span class="empty-state-icon">◈</span>
+        <p>No events matched your search criteria.<br>Try adjusting your filters or clear the search.</p>
+        <a href="/events/list" class="btn btn-veil-ghost">Clear Search</a>
+    </div>
+
+    <!-- Empty: no events at all -->
+    <div th:if="${#lists.isEmpty(events) and !searchActive}" class="empty-state">
         <span class="empty-state-icon">◈</span>
         <p>No events have been created yet.<br>Add your first evening to the calendar.</p>
         <a href="/events/new" class="btn btn-veil-primary">Create Your First Event</a>
@@ -121,7 +221,7 @@
                        th:text="${event.name}"
                        class="event-card-name"></a>
                     <div class="d-flex align-items-center gap-2 mt-2">
-                        <span th:if="${event.active}" class="veil-badge badge active">Active</span>
+                        <span th:if="${event.active}"    class="veil-badge badge active">Active</span>
                         <span th:unless="${event.active}" class="veil-badge badge inactive">Inactive</span>
                         <span style="font-size:0.72rem; color:var(--cream-dim);"
                               th:text="${#temporals.format(event.endDate, 'Ends MMM dd')}"></span>
@@ -148,5 +248,42 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleDateInputs(filter) {
+        const wrapper    = document.getElementById('dateInputsWrapper');
+        const startCol   = document.getElementById('startDateCol');
+        const endDateCol = document.getElementById('endDateCol');
+        const startLabel = document.getElementById('startDateLabel');
+
+        switch (filter) {
+            case 'ALL':
+                wrapper.style.display    = 'none';
+                break;
+            case 'AFTER':
+                wrapper.style.display    = '';
+                startCol.style.display   = '';
+                endDateCol.style.display = 'none';
+                startLabel.textContent   = 'After This Date';
+                break;
+            case 'BEFORE':
+                wrapper.style.display    = '';
+                startCol.style.display   = '';
+                endDateCol.style.display = 'none';
+                startLabel.textContent   = 'Before This Date';
+                break;
+            case 'BETWEEN':
+                wrapper.style.display    = '';
+                startCol.style.display   = '';
+                endDateCol.style.display = '';
+                startLabel.textContent   = 'Start Date';
+                break;
+        }
+    }
+
+    // Restore correct visibility on page load (after form submission)
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleDateInputs(document.getElementById('dateRangeFilter').value);
+    });
+</script>
 </body>
 </html>
