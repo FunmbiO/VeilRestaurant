@@ -42,6 +42,10 @@ public class EventJpaEntity {
     @Column(nullable = false)
     private boolean active;
 
+    // US2 - nullable FK to menus table
+    @Column(nullable = true)
+    private Long menuId;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
@@ -60,7 +64,7 @@ public class EventJpaEntity {
         updatedDate = LocalDateTime.now();
     }
 
-    // Mapping methods
+    // Mapping
 
     public Event toDomain() {
         Event event = new Event();
@@ -72,6 +76,7 @@ public class EventJpaEntity {
         event.setDurationMinutes(this.durationMinutes);
         event.setPrice(this.price);
         event.setActive(this.active);
+        event.setMenuId(this.menuId);
         event.setCreatedDate(this.createdDate);
         event.setUpdatedDate(this.updatedDate);
         return event;
@@ -87,12 +92,14 @@ public class EventJpaEntity {
         entity.setDurationMinutes(event.getDurationMinutes());
         entity.setPrice(event.getPrice());
         entity.setActive(event.isActive());
+        entity.setMenuId(event.getMenuId());
         entity.setCreatedDate(event.getCreatedDate());
         entity.setUpdatedDate(event.getUpdatedDate());
         return entity;
     }
 
-    // Getters and Setters
+    // Getters & Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -109,6 +116,8 @@ public class EventJpaEntity {
     public void setPrice(BigDecimal price) { this.price = price; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+    public Long getMenuId() { return menuId; }
+    public void setMenuId(Long menuId) { this.menuId = menuId; }
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public LocalDateTime getUpdatedDate() { return updatedDate; }
