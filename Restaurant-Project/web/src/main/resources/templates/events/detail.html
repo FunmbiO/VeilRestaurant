@@ -32,7 +32,6 @@
             display: flex; align-items: center; gap: 0.4rem;
         }
         .detail-meta-item strong { color: var(--cream); font-weight: 400; }
-
         .detail-price-badge {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2rem; color: var(--gold); font-weight: 500;
@@ -45,8 +44,9 @@
             border: 0.5px solid rgba(201,168,76,0.08);
             padding: 1.4rem 1.6rem;
         }
+        .info-cell.full-width { grid-column: 1 / -1; }
 
-        /* Description section */
+        /* Description */
         .detail-desc {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.05rem; font-weight: 300; color: var(--cream-dim);
@@ -56,13 +56,25 @@
         }
 
         /* Timestamps */
-        .timestamps {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2rem;
-        }
+        .timestamps { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2rem; }
         .ts-cell {
             background: var(--charcoal);
             border: 0.5px solid rgba(201,168,76,0.06);
             padding: 1rem 1.2rem;
+        }
+
+        /* Menu badge on hero */
+        .menu-tag {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--gold); border: 0.5px solid rgba(201,168,76,0.3);
+            padding: 0.3rem 0.8rem; margin-top: 0.8rem;
+        }
+        .no-menu-tag {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--cream-dim); border: 0.5px solid rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem; margin-top: 0.8rem;
         }
     </style>
 </head>
@@ -85,7 +97,6 @@
 <!-- Detail hero -->
 <div class="detail-hero">
     <div class="container detail-hero-content">
-        <!-- Breadcrumb -->
         <div class="mb-3">
             <a href="/events" class="btn btn-veil-sm back">← Back to Events</a>
         </div>
@@ -107,15 +118,22 @@
                         <span th:unless="${event.active}" class="veil-badge badge inactive">Inactive</span>
                     </div>
                 </div>
+                <!-- Menu tag -->
+                <div class="mt-2">
+                    <span class="menu-tag" th:if="${event.menuName != null}">
+                        ◈ <span th:text="${event.menuName}"></span>
+                    </span>
+                    <span class="no-menu-tag" th:unless="${event.menuName != null}">
+                        ◈ No menu assigned
+                    </span>
+                </div>
             </div>
             <div class="text-end">
                 <div class="detail-price-badge" th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></div>
                 <div style="font-size:0.6rem; letter-spacing:0.12em; color:var(--cream-dim); text-transform:uppercase;">per person</div>
                 <div class="d-flex gap-2 mt-3 justify-content-end">
-                    <a th:href="@{/events/{id}/edit(id=${event.id})}"
-                       class="btn btn-veil-sm edit">✎ Edit</a>
-                    <a th:href="@{/events/{id}/delete(id=${event.id})}"
-                       class="btn btn-veil-sm danger">⊘ Delete</a>
+                    <a th:href="@{/events/{id}/edit(id=${event.id})}" class="btn btn-veil-sm edit">✎ Edit</a>
+                    <a th:href="@{/events/{id}/delete(id=${event.id})}" class="btn btn-veil-sm danger">⊘ Delete</a>
                 </div>
             </div>
         </div>
@@ -156,6 +174,15 @@
                     <span class="veil-field-label">Price</span>
                     <span class="veil-field-value"
                           th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></span>
+                </div>
+                <!-- Menu -->
+                <div class="info-cell full-width">
+                    <span class="veil-field-label">Menu</span>
+                    <span class="veil-field-value"
+                          th:if="${event.menuName != null}"
+                          th:text="${event.menuName}"></span>
+                    <span class="veil-field-value" style="color:var(--cream-dim); font-style:italic;"
+                          th:unless="${event.menuName != null}">No menu assigned</span>
                 </div>
             </div>
 

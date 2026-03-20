@@ -20,13 +20,17 @@
         .form-section-divider::before, .form-section-divider::after {
             content: ''; flex: 1; height: 0.5px; background: rgba(201,168,76,0.12);
         }
-        /* Dirty indicator */
         .dirty-indicator {
             display: none; font-size: 0.65rem; letter-spacing: 0.1em;
             color: var(--gold); align-items: center; gap: 0.4rem;
         }
         .dirty-indicator.visible { display: flex; }
         .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+        .menu-hint {
+            font-size: 0.68rem; color: var(--cream-dim);
+            margin-top: 0.4rem; font-style: italic;
+        }
+        .menu-hint.warning { color: #e0a070; }
     </style>
 </head>
 <body>
@@ -132,6 +136,38 @@
                                 <div class="invalid-feedback" th:errors="*{price}"></div>
                             </div>
 
+                            <div class="form-section-divider"><span>Menu</span></div>
+
+                            <!-- Menu dropdown -->
+                            <div class="mb-3">
+                                <label for="menuId" class="veil-label">Menu Selection</label>
+
+                                <!-- No menus exist -->
+                                <div th:if="${#lists.isEmpty(menus)}">
+                                    <select class="form-select veil-input" disabled>
+                                        <option>No menus available</option>
+                                    </select>
+                                    <p class="menu-hint warning">
+                                        No menus have been created yet.
+                                        <a href="/menus/new" style="color:var(--gold);">Create a menu</a>
+                                        before marking this event as active.
+                                    </p>
+                                </div>
+
+                                <!-- Menus available — pre-select current menu -->
+                                <div th:unless="${#lists.isEmpty(menus)}">
+                                    <select id="menuId" th:field="*{menuId}" class="form-select veil-input">
+                                        <option value="">— No menu selected —</option>
+                                        <option th:each="menu : ${menus}"
+                                                th:value="${menu.id}"
+                                                th:text="${menu.name}"></option>
+                                    </select>
+                                    <p class="menu-hint">
+                                        A menu is required to mark this event as active.
+                                    </p>
+                                </div>
+                            </div>
+
                             <div class="form-section-divider"><span>Visibility</span></div>
 
                             <!-- Active toggle -->
@@ -141,7 +177,7 @@
                                            class="form-check-input" role="switch"/>
                                     <label for="active" class="form-check-label">Active</label>
                                 </div>
-                                <div class="form-text">Active events are visible to guests for reservation requests.</div>
+                                <div class="form-text">Active events are visible to guests. Requires a menu.</div>
                             </div>
 
                             <!-- Actions -->
@@ -171,7 +207,7 @@
 
     form.querySelectorAll('input, textarea, select').forEach(function(field) {
         field.addEventListener('change', function() { formDirty = true; indicator.classList.add('visible'); });
-        field.addEventListener('input', function() { formDirty = true; indicator.classList.add('visible'); });
+        field.addEventListener('input',  function() { formDirty = true; indicator.classList.add('visible'); });
     });
 
     form.addEventListener('submit', function() { formDirty = false; });
