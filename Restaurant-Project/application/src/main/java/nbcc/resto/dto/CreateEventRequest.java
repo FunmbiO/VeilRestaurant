@@ -33,9 +33,11 @@ public class CreateEventRequest {
 
     private boolean active = true;
 
-    public CreateEventRequest() {
+    // US2 - optional menu selection
+    private Long menuId;
 
-    }
+    public CreateEventRequest() {}
+
     public String getName() {
         return name;
     }
@@ -77,5 +79,11 @@ public class CreateEventRequest {
     }
     public void setActive(boolean active) {
         this.active = active;
+    }
+    public Long getMenuId() {
+        return menuId;
+    }
+    public void setMenuId(Long menuId) {
+        this.menuId = menuId;
     }
 }
