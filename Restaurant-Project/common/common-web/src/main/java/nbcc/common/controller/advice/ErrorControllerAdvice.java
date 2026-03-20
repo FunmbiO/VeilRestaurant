@@ -1,6 +1,7 @@
 package nbcc.common.controller.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,11 +16,15 @@ public class ErrorControllerAdvice {
 
     private final Logger logger = LoggerFactory.getLogger(ErrorControllerAdvice.class);
 
+    @ExceptionHandler(ClientAbortException.class)
+    public void clientAbortExceptionHandler(ClientAbortException ex) {
+    }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String authorizationDeniedExceptionExceptionHandler(Model model, AuthorizationDeniedException ex, HttpServletRequest request){
         logger.warn("Unauthorized on uri {}: on method {} ", request.getRequestURI() , request.getMethod(), ex);
-        throw ex; // re throw to let the spring security framework handle it, but catch it so it doesn't get caught by the catch all error handler.
+        throw ex;
     }
 
     @ExceptionHandler(Exception.class)
