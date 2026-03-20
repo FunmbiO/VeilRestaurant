@@ -6,6 +6,7 @@ import nbcc.resto.dto.EventDTO;
 import nbcc.resto.dto.EventSearchCriteria;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.service.EventService;
+import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,9 +25,13 @@ import java.util.List;
 public class EventViewController {
 
     private final EventService eventService;
+    private final MenuService menuService;
 
-    public EventViewController(EventService eventService) {
+
+    public EventViewController(EventService eventService, MenuService menuService) {
+
         this.eventService = eventService;
+        this.menuService = menuService;
     }
 
     // LIST EVENTS  GET /events
@@ -67,6 +72,7 @@ public class EventViewController {
     @GetMapping("/events/new")
     public String showCreateForm(Model model) {
         model.addAttribute("createEventRequest", new CreateEventRequest());
+        model.addAttribute("menus", menuService.getAllMenus());  // add this
         return "events/create";
     }
     // CREATE EVENT SUBMIT  POST /events/new
