@@ -13,6 +13,7 @@ public class Event {
     private Integer durationMinutes;
     private BigDecimal price;
     private boolean active;
+    private Long menuId;           // US2 - nullable, links to Menu
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
@@ -43,6 +44,11 @@ public class Event {
         return priceOk && durationOk;
     }
 
+    // US2 - an event cannot be active (live) without a menu
+    public boolean isLiveWithoutMenu() {
+        return this.active && this.menuId == null;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -59,6 +65,8 @@ public class Event {
     public void setPrice(BigDecimal price) { this.price = price; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+    public Long getMenuId() { return menuId; }
+    public void setMenuId(Long menuId) { this.menuId = menuId; }
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public LocalDateTime getUpdatedDate() { return updatedDate; }
