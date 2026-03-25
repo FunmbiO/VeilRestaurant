@@ -24,7 +24,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final MenuRepository menuRepository;
 
-    public EventService(@Qualifier("eventRepositoryAdapter") EventRepository eventRepository,
+    public EventService(@Qualifier("eventRepositoryImpl") EventRepository eventRepository,
                         MenuRepository menuRepository) {
         this.eventRepository = eventRepository;
         this.menuRepository  = menuRepository;
