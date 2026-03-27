@@ -8,6 +8,7 @@ import nbcc.resto.entity.Menu;
 import nbcc.resto.exception.DuplicateEventNameException;
 import nbcc.resto.exception.InvalidEventException;
 import nbcc.resto.exception.MenuNotFoundException;
+import nbcc.resto.repository.EventRepository;
 import nbcc.resto.repository.MenuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final EventRepository eventRepository;
 
-    public MenuService(MenuRepository menuRepository) {
+    public MenuService(MenuRepository menuRepository, EventRepository eventRepository) {
         this.menuRepository = menuRepository;
+        this.eventRepository = eventRepository;
     }
 
     // Create

@@ -2,14 +2,11 @@ package nbcc.resto.persistence;
 
 import nbcc.resto.entity.Event;
 import nbcc.resto.repository.EventRepository;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class EventRepositoryAdapter implements EventRepository {
 
     private final EventJpaRepository jpaRepository;
