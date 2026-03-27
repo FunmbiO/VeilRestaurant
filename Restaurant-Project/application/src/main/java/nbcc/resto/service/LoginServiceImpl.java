@@ -1,6 +1,5 @@
 package nbcc.resto.service;
 
-import nbcc.auth.config.BearerTokenConfig;
 import nbcc.common.service.LoginService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,12 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class LoginServiceImpl implements LoginService {
-
-    private final BearerTokenConfig bearerTokenConfig;
-
-    public LoginServiceImpl(BearerTokenConfig bearerTokenConfig) {
-        this.bearerTokenConfig = bearerTokenConfig;
-    }
 
     @Override
     public boolean isLoggedIn() {
