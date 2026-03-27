@@ -5,6 +5,7 @@ import nbcc.resto.repository.MenuItemRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,5 +28,16 @@ public class MenuItemRepositoryAdapter implements MenuItemRepository {
                 .stream()
                 .map(MenuItemJpaEntity::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    // US5 - Update & Delete
+    @Override
+    public Optional<MenuItem> findById(Long id) {
+        return jpaRepository.findById(id).map(MenuItemJpaEntity::toDomain);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 }
