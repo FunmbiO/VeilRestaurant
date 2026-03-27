@@ -17,8 +17,6 @@
             font-size: clamp(2rem, 3.5vw, 3rem);
             font-weight: 700; line-height: 1.05; color: var(--cream);
         }
-
-        /* Shared panel style */
         .form-panel {
             background: var(--off-black);
             border: 0.5px solid rgba(201,168,76,0.15);
@@ -39,8 +37,6 @@
         }
         .dirty-indicator.visible { display: flex; }
         .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-
-        /* Section divider */
         .section-divider {
             display: flex; align-items: center; gap: 1rem; margin: 3rem 0 2rem;
         }
@@ -51,16 +47,14 @@
         .section-divider::before, .section-divider::after {
             content: ''; flex: 1; height: 0.5px; background: rgba(201,168,76,0.12);
         }
-
-        /* Menu items list */
         .menu-item-row {
             background: var(--off-black);
             border: 0.5px solid rgba(201,168,76,0.08);
             padding: 1rem 1.4rem;
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr 2fr auto;
             gap: 1rem;
-            align-items: start;
+            align-items: center;
             transition: border-color 0.2s;
         }
         .menu-item-row:hover { border-color: rgba(201,168,76,0.2); }
@@ -69,17 +63,19 @@
             font-size: 0.95rem; font-weight: 400; color: var(--cream);
         }
         .menu-item-row-desc {
-            font-size: 0.8rem; color: var(--cream-dim);
             font-family: 'Cormorant Garamond', serif;
             font-size: 0.95rem; font-weight: 300; line-height: 1.5;
+            color: var(--cream-dim);
+        }
+        .menu-item-row-actions {
+            display: flex; gap: 0.4rem;
+            align-items: center; justify-content: flex-end;
         }
         .menu-item-rule {
             height: 0.5px;
             background: linear-gradient(to right, transparent, rgba(201,168,76,0.06), transparent);
             margin: 0; border: none;
         }
-
-        /* Add item form */
         .add-item-panel {
             background: var(--charcoal);
             border: 0.5px solid rgba(201,168,76,0.12);
@@ -90,8 +86,6 @@
             font-size: 0.56rem; letter-spacing: 0.25em; text-transform: uppercase;
             color: var(--gold-dim); display: block; margin-bottom: 1.2rem;
         }
-
-        /* Empty items state */
         .items-empty {
             background: var(--off-black);
             border: 0.5px solid rgba(201,168,76,0.08);
@@ -104,7 +98,6 @@
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<!-- Hero -->
 <div class="edit-hero">
     <div class="container">
         <a href="/menus" class="btn btn-veil-sm back mb-3">← Back to Menus</a>
@@ -122,14 +115,11 @@
 
 <div class="container pb-5">
 
-    <!-- Error messages -->
     <div th:if="${errorMessage}" class="alert veil-alert error alert-dismissible fade show mb-4"
          style="max-width:900px;" role="alert">
         <span th:text="${errorMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-
-    <!-- Item success/error flash -->
     <div th:if="${itemSuccess}" class="alert veil-alert success alert-dismissible fade show mb-4"
          style="max-width:900px;" role="alert">
         <span th:text="${itemSuccess}"></span>
@@ -143,7 +133,7 @@
 
     <div class="row g-5" style="max-width:900px;">
 
-        <!-- ── LEFT: Menu details form ─────────────────────────────────────── -->
+        <!-- LEFT: Menu details -->
         <div class="col-lg-5">
             <span class="veil-eyebrow mb-3 d-block">Menu Details</span>
             <div class="form-panel">
@@ -183,7 +173,7 @@
             </div>
         </div>
 
-        <!-- ── RIGHT: Menu items ───────────────────────────────────────────── -->
+        <!-- RIGHT: Menu items -->
         <div class="col-lg-7">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="veil-eyebrow">Menu Items</span>
@@ -199,6 +189,12 @@
                     <div class="menu-item-row">
                         <span class="menu-item-row-name" th:text="${item.name}"></span>
                         <span class="menu-item-row-desc" th:text="${item.description}"></span>
+                        <div class="menu-item-row-actions">
+                            <a th:href="@{/menus/{menuId}/items/{itemId}/edit(menuId=${menu.id}, itemId=${item.id})}"
+                               class="btn btn-veil-sm edit" title="Edit Item">✎</a>
+                            <a th:href="@{/menus/{menuId}/items/{itemId}/delete(menuId=${menu.id}, itemId=${item.id})}"
+                               class="btn btn-veil-sm danger" title="Delete Item">⊘</a>
+                        </div>
                     </div>
                     <hr class="menu-item-rule" th:unless="${iter.last}"/>
                 </th:block>
@@ -212,7 +208,6 @@
             <!-- Add item form -->
             <div class="add-item-panel" id="addItemForm">
                 <span class="add-item-panel-title">Add Menu Item</span>
-
                 <form th:action="@{/menus/{id}/items(id=${menu.id})}"
                       th:object="${newMenuItem}"
                       method="post"
@@ -223,12 +218,8 @@
                             Item Name <span style="color:var(--gold);">*</span>
                         </label>
                         <input type="text" id="itemName" th:field="*{name}"
-                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
                                class="form-control veil-input"
                                placeholder="e.g. Seared Scallops"/>
-                        <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
-                            <span th:errors="*{name}"></span>
-                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -236,12 +227,8 @@
                             Description <span style="color:var(--gold);">*</span>
                         </label>
                         <textarea id="itemDescription" th:field="*{description}"
-                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
                                   class="form-control veil-input" rows="2"
                                   placeholder="e.g. With cauliflower purée and crispy capers"></textarea>
-                        <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
-                            <span th:errors="*{description}"></span>
-                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-veil-primary">+ Add Item</button>
@@ -267,10 +254,9 @@
     });
     form.addEventListener('submit', function() { formDirty = false; });
     window.addEventListener('beforeunload', function(e) {
-        if (formDirty) { e.preventDefault(); e.returnValue = ''; }
+        if (formDirty) { e.preventDefault(); }
     });
 
-    // Scroll to add item form if there were item validation errors
     const itemFormError = /*[[${itemFormError}]]*/ false;
     if (itemFormError) {
         document.getElementById('addItemForm').scrollIntoView({ behavior: 'smooth', block: 'start' });

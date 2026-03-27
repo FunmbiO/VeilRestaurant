@@ -1,20 +1,15 @@
 package nbcc.resto.controller;
 
 import jakarta.validation.Valid;
-import nbcc.resto.dto.CreateMenuItemRequest;
-import nbcc.resto.dto.CreateMenuRequest;
-import nbcc.resto.dto.MenuDTO;
-import nbcc.resto.dto.UpdateMenuRequest;
+import nbcc.resto.dto.*;
+import nbcc.resto.exception.MenuItemNotFoundException;
 import nbcc.resto.exception.MenuNotFoundException;
 import nbcc.resto.service.MenuItemService;
 import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -32,11 +27,19 @@ public class MenuViewController {
 
     // LIST  GET /menus
     @GetMapping("/menus")
-    public String listMenus(Model model) {
-        List<MenuDTO> menus = menuService.getAllMenus();
+    public String listMenus(@RequestParam(required = false) String search, Model model) {
+        boolean searchActive = search != null && !search.isBlank();
+        List<MenuDTO> menus = searchActive
+                ? menuService.searchMenus(search)
+                : menuService.getAllMenus();
+
         model.addAttribute("menus", menus);
+        model.addAttribute("search", search != null ? search : "");
+        model.addAttribute("searchActive", searchActive);
+        model.addAttribute("resultCount", menus.size());
         return "menus/list";
     }
+
     // MENU DETAIL  GET /menus/{id}
     @GetMapping("/menus/{id}")
     public String menuDetail(@PathVariable Long id, Model model) {
@@ -167,6 +170,90 @@ public class MenuViewController {
             redirectAttributes.addFlashAttribute("itemError", e.getMessage());
         }
         return "redirect:/menus/" + id + "/edit";
+    }
+
+    // Edit Menu Item Form  GET /menus/{menuId}/items/{itemId}/edit
+
+    @GetMapping("/menus/{menuId}/items/{itemId}/edit")
+    public String showEditItemForm(@PathVariable Long menuId,
+                                   @PathVariable Long itemId,
+                                   Model model) {
+        try {
+            MenuDTO menu = menuService.getMenuById(menuId);
+            MenuItemDTO item = menuItemService.getMenuItemById(itemId);
+            UpdateMenuItemRequest formRequest = new UpdateMenuItemRequest();
+            formRequest.setName(item.getName());
+            formRequest.setDescription(item.getDescription());
+            model.addAttribute("menu", menu);
+            model.addAttribute("item", item);
+            model.addAttribute("formRequest", formRequest);
+            return "menus/edit-item";
+        } catch (MenuNotFoundException | MenuItemNotFoundException e) {
+            return "redirect:/menus";
+        }
+    }
+
+    //  Edit Menu Item Submit  POST /menus/{menuId}/items/{itemId}/edit
+
+    @PostMapping("/menus/{menuId}/items/{itemId}/edit")
+    public String submitEditItemForm(
+            @PathVariable Long menuId,
+            @PathVariable Long itemId,
+            @Valid @ModelAttribute("formRequest") UpdateMenuItemRequest formRequest,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            try {
+                model.addAttribute("menu", menuService.getMenuById(menuId));
+                model.addAttribute("item", menuItemService.getMenuItemById(itemId));
+            } catch (Exception e) {
+                return "redirect:/menus";
+            }
+            return "menus/edit-item";
+        }
+        try {
+            menuItemService.updateMenuItem(itemId, formRequest);
+            redirectAttributes.addFlashAttribute("itemSuccess", "Menu item updated successfully.");
+        } catch (MenuItemNotFoundException e) {
+            redirectAttributes.addFlashAttribute("itemError", "Menu item not found.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("itemError", e.getMessage());
+        }
+        return "redirect:/menus/" + menuId + "/edit";
+    }
+
+    // Delete Menu Item Confirm  GET /menus/{menuId}/items/{itemId}/delete
+
+    @GetMapping("/menus/{menuId}/items/{itemId}/delete")
+    public String showDeleteItemConfirm(@PathVariable Long menuId,
+                                        @PathVariable Long itemId,
+                                        Model model) {
+        try {
+            model.addAttribute("menu", menuService.getMenuById(menuId));
+            model.addAttribute("item", menuItemService.getMenuItemById(itemId));
+            return "menus/delete-item";
+        } catch (MenuNotFoundException | MenuItemNotFoundException e) {
+            return "redirect:/menus/" + menuId + "/edit";
+        }
+    }
+
+    // Delete Menu Item Submit  POST /menus/{menuId}/items/{itemId}/delete
+
+    @PostMapping("/menus/{menuId}/items/{itemId}/delete")
+    public String confirmDeleteItem(@PathVariable Long menuId,
+                                    @PathVariable Long itemId,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            menuItemService.deleteMenuItem(itemId);
+            redirectAttributes.addFlashAttribute("itemSuccess", "Menu item deleted successfully.");
+        } catch (MenuItemNotFoundException e) {
+            redirectAttributes.addFlashAttribute("itemError", "Menu item not found.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("itemError", e.getMessage());
+        }
+        return "redirect:/menus/" + menuId + "/edit";
     }
 
     // Delete Confirm  GET /menus/{id}/delete
