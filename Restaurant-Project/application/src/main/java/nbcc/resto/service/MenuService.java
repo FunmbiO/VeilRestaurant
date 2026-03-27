@@ -1,7 +1,9 @@
 package nbcc.resto.service;
 
+import jakarta.validation.Valid;
 import nbcc.resto.dto.CreateMenuRequest;
 import nbcc.resto.dto.MenuDTO;
+import nbcc.resto.dto.UpdateMenuRequest;
 import nbcc.resto.entity.Menu;
 import nbcc.resto.exception.DuplicateEventNameException;
 import nbcc.resto.exception.InvalidEventException;
@@ -55,5 +57,42 @@ public class MenuService {
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new MenuNotFoundException(id));
         return MenuDTO.from(menu);
+    }
+
+    // Update
+
+    @Transactional
+    public MenuDTO updateMenu(Long id, @Valid UpdateMenuRequest request) {
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new MenuNotFoundException(id));
+
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new InvalidEventException("Menu name is required.");
+        }
+        if (menuRepository.existsByNameAndIdNot(request.getName().trim(), id)) {
+            throw new DuplicateEventNameException(request.getName().trim());
+        }
+
+        menu.setName(request.getName().trim());
+        menu.setDescription(request.getDescription());
+        return MenuDTO.from(menuRepository.save(menu));
+    }
+
+    // Delete
+
+    @Transactional(readOnly = true)
+    public List<String> getAssociatedEventNames(Long menuId) {
+        return eventRepository.findAllActive()
+                .stream()
+                .filter(e -> menuId.equals(e.getMenuId()))
+                .map(e -> e.getName())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteMenu(Long id) {
+        menuRepository.findById(id)
+                .orElseThrow(() -> new MenuNotFoundException(id));
+        menuRepository.deleteById(id);
     }
 }

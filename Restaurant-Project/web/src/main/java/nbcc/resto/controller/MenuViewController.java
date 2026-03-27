@@ -3,6 +3,7 @@ package nbcc.resto.controller;
 import jakarta.validation.Valid;
 import nbcc.resto.dto.CreateMenuRequest;
 import nbcc.resto.dto.MenuDTO;
+import nbcc.resto.dto.UpdateMenuRequest;
 import nbcc.resto.exception.MenuNotFoundException;
 import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -69,5 +71,89 @@ public class MenuViewController {
             return "menus/create";
         }
     }
+    // Edit Form  GET /menus/{id}/edit
 
+    @GetMapping("/menus/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        try {
+            MenuDTO menu = menuService.getMenuById(id);
+            UpdateMenuRequest formRequest = new UpdateMenuRequest();
+            formRequest.setName(menu.getName());
+            formRequest.setDescription(menu.getDescription());
+            model.addAttribute("menu", menu);
+            model.addAttribute("formRequest", formRequest);
+            return "menus/edit";
+        } catch (MenuNotFoundException e) {
+            return "redirect:/menus";
+        }
+    }
+
+    // Edit Submit  POST /menus/{id}/edit
+
+    @PostMapping("/menus/{id}/edit")
+    public String submitEditForm(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("formRequest") UpdateMenuRequest formRequest,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            try {
+                MenuDTO menu = menuService.getMenuById(id);
+                model.addAttribute("menu", menu);
+            } catch (MenuNotFoundException e) {
+                return "redirect:/menus";
+            }
+            return "menus/edit";
+        }
+        try {
+            menuService.updateMenu(id, formRequest);
+            redirectAttributes.addFlashAttribute("successMessage", "Menu updated successfully.");
+            return "redirect:/menus/" + id;
+        } catch (MenuNotFoundException e) {
+            return "redirect:/menus";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            try {
+                MenuDTO menu = menuService.getMenuById(id);
+                model.addAttribute("menu", menu);
+            } catch (MenuNotFoundException notFound) {
+                return "redirect:/menus";
+            }
+            return "menus/edit";
+        }
+    }
+
+    // Delete Confirm  GET /menus/{id}/delete
+
+    @GetMapping("/menus/{id}/delete")
+    public String showDeleteConfirm(@PathVariable Long id, Model model) {
+        try {
+            MenuDTO menu = menuService.getMenuById(id);
+            List<String> associatedEvents = menuService.getAssociatedEventNames(id);
+            model.addAttribute("menu", menu);
+            model.addAttribute("associatedEvents", associatedEvents);
+            return "menus/delete";
+        } catch (MenuNotFoundException e) {
+            return "redirect:/menus";
+        }
+    }
+
+    // Delete Submit  POST /menus/{id}/delete
+
+    @PostMapping("/menus/{id}/delete")
+    public String confirmDelete(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            menuService.deleteMenu(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Menu deleted successfully.");
+        } catch (MenuNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Menu not found.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/menus";
+    }
 }

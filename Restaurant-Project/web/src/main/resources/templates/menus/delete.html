@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Delete ' + ${menu.name} + ' — Veil'">Delete Menu — Veil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        .delete-hero {
+            padding: 3.5rem 0 2.5rem;
+            border-bottom: 0.5px solid rgba(192,57,43,0.2);
+            margin-bottom: 3rem;
+        }
+        .delete-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 700; color: var(--cream);
+        }
+        .confirm-panel {
+            background: var(--off-black);
+            border: 0.5px solid rgba(192,57,43,0.3);
+            max-width: 600px;
+        }
+        .confirm-panel-header {
+            background: rgba(192,57,43,0.12);
+            border-bottom: 0.5px solid rgba(192,57,43,0.25);
+            padding: 1.2rem 2rem;
+        }
+        .confirm-panel-header h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400; color: #e07070; margin: 0;
+        }
+        .confirm-panel-body { padding: 2rem; }
+        .confirm-panel-footer {
+            border-top: 0.5px solid rgba(192,57,43,0.15);
+            padding: 1.2rem 2rem;
+            display: flex; gap: 0.75rem; align-items: center;
+        }
+        .detail-rule {
+            border: none; height: 0.5px;
+            background: linear-gradient(to right, transparent, rgba(201,168,76,0.1), transparent);
+            margin: 1.2rem 0;
+        }
+
+        /* Associated events warning */
+        .events-warning {
+            background: rgba(201,168,76,0.06);
+            border: 0.5px solid rgba(201,168,76,0.2);
+            padding: 1rem 1.2rem;
+            margin-top: 1.2rem;
+        }
+        .events-warning-title {
+            font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--gold); display: block; margin-bottom: 0.6rem;
+        }
+        .events-warning ul {
+            margin: 0; padding-left: 1.2rem;
+            font-size: 0.82rem; color: var(--cream-dim);
+        }
+        .events-warning ul li { margin-bottom: 0.2rem; }
+        .events-warning-note {
+            font-size: 0.72rem; color: var(--cream-dim);
+            margin-top: 0.6rem; font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<div class="delete-hero">
+    <div class="container">
+        <a href="/menus" class="btn btn-veil-sm back mb-3">← Back to Menus</a>
+        <span class="veil-eyebrow" style="color:#e07070;">Danger Zone</span>
+        <h1>Delete <em th:text="${menu.name}" style="color:#e07070; font-style:italic;"></em></h1>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="confirm-panel">
+
+        <div class="confirm-panel-header">
+            <h5>Confirm Deletion</h5>
+        </div>
+
+        <div class="confirm-panel-body">
+
+            <p style="font-size:0.85rem; color:var(--cream-dim);">
+                You are about to permanently delete this menu. This action cannot be undone.
+            </p>
+
+            <hr class="detail-rule"/>
+
+            <!-- Menu details -->
+            <div class="mb-3">
+                <span class="veil-field-label">Name</span>
+                <span class="veil-field-value" th:text="${menu.name}"></span>
+            </div>
+
+            <div th:if="${menu.description != null and !#strings.isEmpty(menu.description)}">
+                <span class="veil-field-label">Description</span>
+                <p style="font-size:0.88rem; color:var(--cream-dim); margin:0;"
+                   th:text="${menu.description}"></p>
+            </div>
+
+            <!-- Associated events warning -->
+            <div class="events-warning" th:if="${!#lists.isEmpty(associatedEvents)}">
+                <span class="events-warning-title">⚠ Associated Events</span>
+                <ul>
+                    <li th:each="eventName : ${associatedEvents}" th:text="${eventName}"></li>
+                </ul>
+                <p class="events-warning-note">
+                    These events are currently using this menu. Deleting it will remove their menu association.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="confirm-panel-footer">
+            <form th:action="@{/menus/{id}/delete(id=${menu.id})}" method="post">
+                <button type="submit" class="btn btn-veil-danger">⊘ Confirm Delete</button>
+            </form>
+            <a th:href="@{/menus/{id}(id=${menu.id})}" class="btn btn-veil-ghost">Cancel</a>
+        </div>
+
+    </div>
+
+</div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

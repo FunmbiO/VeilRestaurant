@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Edit ' + ${menu.name} + ' — Veil'">Edit Menu — Veil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        .edit-hero {
+            padding: 3.5rem 0 2.5rem;
+            border-bottom: 0.5px solid rgba(201,168,76,0.12);
+            margin-bottom: 3rem;
+        }
+        .edit-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 700; line-height: 1.05; color: var(--cream);
+        }
+        .form-panel {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.15);
+            padding: 2.5rem;
+            max-width: 600px;
+        }
+        .form-footer {
+            border-top: 0.5px solid rgba(201,168,76,0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .dirty-indicator {
+            display: none; font-size: 0.65rem; letter-spacing: 0.1em;
+            color: var(--gold); align-items: center; gap: 0.4rem;
+            margin-left: auto;
+        }
+        .dirty-indicator.visible { display: flex; }
+        .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<div class="edit-hero">
+    <div class="container">
+        <a href="/menus" class="btn btn-veil-sm back mb-3">← Back to Menus</a>
+        <div class="d-flex align-items-center justify-content-between" style="max-width:600px;">
+            <div>
+                <span class="veil-eyebrow">Editing</span>
+                <h1 th:text="${menu.name}">Menu Name</h1>
+            </div>
+            <div id="dirtyIndicator" class="dirty-indicator">
+                <span class="dirty-dot"></span> Unsaved changes
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div th:if="${errorMessage}" class="alert veil-alert error alert-dismissible fade show mb-4"
+         style="max-width:600px;" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="form-panel">
+        <form th:action="@{/menus/{id}/edit(id=${menu.id})}"
+              th:object="${formRequest}"
+              method="post"
+              novalidate
+              id="editForm">
+
+            <!-- Name -->
+            <div class="mb-4">
+                <label class="veil-label" for="name">
+                    Menu Name <span style="color:var(--gold);">*</span>
+                </label>
+                <input type="text"
+                       id="name"
+                       th:field="*{name}"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                       class="form-control veil-input"/>
+                <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
+                    <span th:errors="*{name}"></span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <label class="veil-label" for="description">
+                    Description <span style="color:var(--cream-dim); font-size:0.55rem;">(optional)</span>
+                </label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          class="form-control veil-input"
+                          rows="4"
+                          placeholder="A brief description of this menu…"></textarea>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-veil-primary">Save Changes</button>
+                <a th:href="@{/menus/{id}(id=${menu.id})}" class="btn btn-veil-ghost">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let formDirty = false;
+    const form = document.getElementById('editForm');
+    const indicator = document.getElementById('dirtyIndicator');
+
+    form.querySelectorAll('input, textarea').forEach(function(field) {
+        field.addEventListener('input', function() { formDirty = true; indicator.classList.add('visible'); });
+    });
+    form.addEventListener('submit', function() { formDirty = false; });
+    window.addEventListener('beforeunload', function(e) {
+        if (formDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+</script>
+</body>
+</html>

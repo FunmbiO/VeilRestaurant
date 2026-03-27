@@ -40,4 +40,15 @@ public class MenuRepositoryAdapter implements MenuRepository {
     public boolean existsByName(String name) {
         return jpaRepository.existsByName(name);
     }
+
+    // US3 - Update & Delete
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return jpaRepository.existsByNameAndIdNot(name, id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
+    }
 }

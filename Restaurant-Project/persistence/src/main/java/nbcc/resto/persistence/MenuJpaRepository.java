@@ -11,4 +11,7 @@ public interface MenuJpaRepository extends JpaRepository<MenuJpaEntity, Long> {
     boolean existsByName(String name);
     Optional<MenuJpaEntity> findByName(String name);
     List<MenuJpaEntity> findAllByOrderByCreatedDateTimeDesc();
+
+    // US3 - Update & Delete
+    boolean existsByNameAndIdNot(String name, Long id);
 }

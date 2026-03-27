@@ -10,4 +10,8 @@ public interface MenuRepository {
     Optional<Menu> findById(Long id);
     List<Menu> findAll();
     boolean existsByName(String name);
+
+    // US3 - Update & Delete
+    boolean existsByNameAndIdNot(String name, Long id);
+    void deleteById(Long id);
 }
