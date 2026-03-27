@@ -19,8 +19,7 @@ public class MenuRepositoryAdapter implements MenuRepository {
 
     @Override
     public Menu save(Menu menu) {
-        MenuJpaEntity entity = MenuJpaEntity.fromDomain(menu);
-        return jpaRepository.save(entity).toDomain();
+        return jpaRepository.save(MenuJpaEntity.fromDomain(menu)).toDomain();
     }
 
     @Override
@@ -31,9 +30,7 @@ public class MenuRepositoryAdapter implements MenuRepository {
     @Override
     public List<Menu> findAll() {
         return jpaRepository.findAllByOrderByCreatedDateTimeDesc()
-                .stream()
-                .map(MenuJpaEntity::toDomain)
-                .collect(Collectors.toList());
+                .stream().map(MenuJpaEntity::toDomain).collect(Collectors.toList());
     }
 
     @Override
@@ -41,7 +38,6 @@ public class MenuRepositoryAdapter implements MenuRepository {
         return jpaRepository.existsByName(name);
     }
 
-    // US3 - Update & Delete
     @Override
     public boolean existsByNameAndIdNot(String name, Long id) {
         return jpaRepository.existsByNameAndIdNot(name, id);
@@ -50,5 +46,12 @@ public class MenuRepositoryAdapter implements MenuRepository {
     @Override
     public void deleteById(Long id) {
         jpaRepository.deleteById(id);
+    }
+
+    // US6 - Search
+    @Override
+    public List<Menu> searchByName(String name) {
+        return jpaRepository.searchByName(name)
+                .stream().map(MenuJpaEntity::toDomain).collect(Collectors.toList());
     }
 }
