@@ -1,10 +1,12 @@
 package nbcc.resto.controller;
 
 import jakarta.validation.Valid;
+import nbcc.resto.dto.CreateMenuItemRequest;
 import nbcc.resto.dto.CreateMenuRequest;
 import nbcc.resto.dto.MenuDTO;
 import nbcc.resto.dto.UpdateMenuRequest;
 import nbcc.resto.exception.MenuNotFoundException;
+import nbcc.resto.service.MenuItemService;
 import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,9 +23,11 @@ import java.util.List;
 public class MenuViewController {
 
     private final MenuService menuService;
+    private final MenuItemService menuItemService;
 
-    public MenuViewController(MenuService menuService) {
+    public MenuViewController(MenuService menuService, MenuItemService menuItemService) {
         this.menuService = menuService;
+        this.menuItemService = menuItemService;
     }
 
     // LIST  GET /menus
@@ -39,6 +43,7 @@ public class MenuViewController {
         try {
             MenuDTO menu = menuService.getMenuById(id);
             model.addAttribute("menu", menu);
+            model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));  // add this
             return "menus/detail";
         } catch (MenuNotFoundException e) {
             return "redirect:/menus";
@@ -82,6 +87,8 @@ public class MenuViewController {
             formRequest.setDescription(menu.getDescription());
             model.addAttribute("menu", menu);
             model.addAttribute("formRequest", formRequest);
+            model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));  // add this
+            model.addAttribute("newMenuItem", new CreateMenuItemRequest());          // add this
             return "menus/edit";
         } catch (MenuNotFoundException e) {
             return "redirect:/menus";
@@ -102,6 +109,8 @@ public class MenuViewController {
             try {
                 MenuDTO menu = menuService.getMenuById(id);
                 model.addAttribute("menu", menu);
+                model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));
+                model.addAttribute("newMenuItem", new CreateMenuItemRequest());
             } catch (MenuNotFoundException e) {
                 return "redirect:/menus";
             }
@@ -123,6 +132,41 @@ public class MenuViewController {
             }
             return "menus/edit";
         }
+    }
+    // Add Menu Item  POST /menus/{id}/items
+
+    @PostMapping("/menus/{id}/items")
+    public String addMenuItem(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("newMenuItem") CreateMenuItemRequest newMenuItem,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            try {
+                MenuDTO menu = menuService.getMenuById(id);
+                UpdateMenuRequest formRequest = new UpdateMenuRequest();
+                formRequest.setName(menu.getName());
+                formRequest.setDescription(menu.getDescription());
+                model.addAttribute("menu", menu);
+                model.addAttribute("formRequest", formRequest);
+                model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));
+                model.addAttribute("newMenuItem", newMenuItem);
+                model.addAttribute("itemFormError", true); // flag to scroll to item form
+            } catch (MenuNotFoundException e) {
+                return "redirect:/menus";
+            }
+            return "menus/edit";
+        }
+
+        try {
+            menuItemService.createMenuItem(id, newMenuItem);
+            redirectAttributes.addFlashAttribute("itemSuccess", "Menu item added successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("itemError", e.getMessage());
+        }
+        return "redirect:/menus/" + id + "/edit";
     }
 
     // Delete Confirm  GET /menus/{id}/delete

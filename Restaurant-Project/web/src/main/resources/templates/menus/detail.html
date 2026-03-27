@@ -115,6 +115,29 @@
             </div>
 
             <hr class="detail-rule"/>
+            <hr class="detail-rule"/>
+
+            <!-- Menu Items -->
+            <div class="detail-field">
+                <span class="veil-field-label">Menu Items</span>
+                <div th:if="${#lists.isEmpty(menuItems)}"
+                     style="font-size:0.88rem; color:var(--cream-dim); font-style:italic;">
+                    No items on this menu yet.
+                </div>
+                <div th:unless="${#lists.isEmpty(menuItems)}" class="mt-2">
+                    <div th:each="item, iter : ${menuItems}">
+                        <div style="margin-bottom:0.8rem;">
+                <span style="font-family:'Playfair Display',serif; font-size:0.95rem; color:var(--cream);"
+                      th:text="${item.name}"></span>
+                            <br/>
+                            <span style="font-size:0.82rem; color:var(--cream-dim);"
+                                  th:text="${item.description}"></span>
+                        </div>
+                        <hr th:unless="${iter.last}" style="border:none; height:0.5px;
+                background:linear-gradient(to right,transparent,rgba(201,168,76,0.08),transparent); margin:0.5rem 0;"/>
+                    </div>
+                </div>
+            </div>
 
             <!-- Created Date and Time -->
             <div class="detail-field">
