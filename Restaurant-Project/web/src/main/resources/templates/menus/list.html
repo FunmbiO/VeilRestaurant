@@ -22,6 +22,24 @@
             font-size: 1.05rem; color: var(--cream-dim); font-weight: 300;
             line-height: 1.65; max-width: 360px;
         }
+
+        /* Search section */
+        .search-section {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.15);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .search-section-title {
+            font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--gold); display: block; margin-bottom: 1rem;
+        }
+        .search-result-count {
+            font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--cream-dim); margin-bottom: 1.5rem;
+        }
+        .search-result-count span { color: var(--gold); }
+
         .menu-item {
             background: var(--off-black);
             border: 0.5px solid rgba(201,168,76,0.1);
@@ -79,6 +97,7 @@
 
 <div class="container py-5">
 
+    <!-- Flash messages -->
     <div th:if="${successMessage}" class="alert veil-alert success alert-dismissible fade show mb-4" role="alert">
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -92,17 +111,54 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div th:if="${!#lists.isEmpty(menus)}" class="mb-4">
+    <!-- Search section -->
+    <div class="search-section">
+        <span class="search-section-title">Search Menus</span>
+        <form th:action="@{/menus}" method="get">
+            <div class="d-flex gap-2 align-items-end">
+                <div class="flex-grow-1">
+                    <label class="veil-label" for="search">Menu Name</label>
+                    <input type="text"
+                           id="search"
+                           name="search"
+                           th:value="${search}"
+                           class="form-control veil-input"
+                           placeholder="Search by name…"/>
+                </div>
+                <button type="submit" class="btn btn-veil-primary">Search</button>
+                <a href="/menus" class="btn btn-veil-ghost">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Result count when search is active -->
+    <p th:if="${searchActive}" class="search-result-count">
+        <span th:text="${resultCount}"></span>
+        result<span th:if="${resultCount != 1}">s</span> found
+        for "<span th:text="${search}"></span>"
+    </p>
+
+    <!-- Count when no search -->
+    <div th:if="${!searchActive and !#lists.isEmpty(menus)}" class="mb-4">
         <span class="veil-eyebrow"
               th:text="${#lists.size(menus)} + ' menu' + (${#lists.size(menus)} != 1 ? 's' : '') + ' available'"></span>
     </div>
 
-    <div th:if="${#lists.isEmpty(menus)}" class="empty-state">
+    <!-- Empty: no search results -->
+    <div th:if="${#lists.isEmpty(menus) and searchActive}" class="empty-state">
+        <span class="empty-state-icon">◈</span>
+        <p>No menus matched your search.<br>Try a different name or clear the search.</p>
+        <a href="/menus" class="btn btn-veil-ghost">Clear Search</a>
+    </div>
+
+    <!-- Empty: no menus at all -->
+    <div th:if="${#lists.isEmpty(menus) and !searchActive}" class="empty-state">
         <span class="empty-state-icon">◈</span>
         <p>No menus have been created yet.<br>Build your first curated menu.</p>
         <a href="/menus/new" class="btn btn-veil-primary">Create Your First Menu</a>
     </div>
 
+    <!-- Menu list -->
     <div th:if="${!#lists.isEmpty(menus)}" class="d-flex flex-column gap-0">
         <th:block th:each="menu, iter : ${menus}">
             <div class="menu-item">
