@@ -1,0 +1,6 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd Restaurant-Project && mvn -B -DskipTests clean package -pl application -am"
+
+[deploy]
+startCommand = "java -Dserver.port=$PORT $JAVA_OPTS -jar Restaurant-Project/application/target/*.jar"
