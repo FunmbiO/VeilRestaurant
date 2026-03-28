@@ -89,11 +89,6 @@
             <artifactId>common-infrastructure</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>io.sentry</groupId>
-            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
-            <version>8.0.0</version>
-        </dependency>
     </dependencies>
 
     <build>
