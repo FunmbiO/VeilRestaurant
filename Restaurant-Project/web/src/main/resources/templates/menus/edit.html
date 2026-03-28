@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Edit ' + ${menu.name} + ' — Veil'">Edit Menu — Veil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        .edit-hero {
+            padding: 3.5rem 0 2.5rem;
+            border-bottom: 0.5px solid rgba(201,168,76,0.12);
+            margin-bottom: 3rem;
+        }
+        .edit-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 700; line-height: 1.05; color: var(--cream);
+        }
+        .form-panel {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.15);
+            padding: 2.5rem;
+        }
+        .form-footer {
+            border-top: 0.5px solid rgba(201,168,76,0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .dirty-indicator {
+            display: none; font-size: 0.65rem; letter-spacing: 0.1em;
+            color: var(--gold); align-items: center; gap: 0.4rem;
+            margin-left: auto;
+        }
+        .dirty-indicator.visible { display: flex; }
+        .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+        .section-divider {
+            display: flex; align-items: center; gap: 1rem; margin: 3rem 0 2rem;
+        }
+        .section-divider span {
+            font-size: 0.56rem; letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--gold-dim); white-space: nowrap;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 0.5px; background: rgba(201,168,76,0.12);
+        }
+        .menu-item-row {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.08);
+            padding: 1rem 1.4rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 1rem;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        .menu-item-row:hover { border-color: rgba(201,168,76,0.2); }
+        .menu-item-row-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.95rem; font-weight: 400; color: var(--cream);
+        }
+        .menu-item-row-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem; font-weight: 300; line-height: 1.5;
+            color: var(--cream-dim);
+        }
+        .menu-item-row-actions {
+            display: flex; gap: 0.4rem;
+            align-items: center; justify-content: flex-end;
+        }
+        .menu-item-rule {
+            height: 0.5px;
+            background: linear-gradient(to right, transparent, rgba(201,168,76,0.06), transparent);
+            margin: 0; border: none;
+        }
+        .add-item-panel {
+            background: var(--charcoal);
+            border: 0.5px solid rgba(201,168,76,0.12);
+            padding: 1.8rem;
+            margin-top: 1.5rem;
+        }
+        .add-item-panel-title {
+            font-size: 0.56rem; letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--gold-dim); display: block; margin-bottom: 1.2rem;
+        }
+        .items-empty {
+            background: var(--off-black);
+            border: 0.5px solid rgba(201,168,76,0.08);
+            padding: 2.5rem; text-align: center;
+        }
+        .items-empty p { font-size: 0.8rem; color: var(--cream-dim); margin: 0; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<div class="edit-hero">
+    <div class="container">
+        <a href="/menus" class="btn btn-veil-sm back mb-3">← Back to Menus</a>
+        <div class="d-flex align-items-center justify-content-between" style="max-width:900px;">
+            <div>
+                <span class="veil-eyebrow">Editing</span>
+                <h1 th:text="${menu.name}">Menu Name</h1>
+            </div>
+            <div id="dirtyIndicator" class="dirty-indicator">
+                <span class="dirty-dot"></span> Unsaved changes
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <div th:if="${errorMessage}" class="alert veil-alert error alert-dismissible fade show mb-4"
+         style="max-width:900px;" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${itemSuccess}" class="alert veil-alert success alert-dismissible fade show mb-4"
+         style="max-width:900px;" role="alert">
+        <span th:text="${itemSuccess}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${itemError}" class="alert veil-alert error alert-dismissible fade show mb-4"
+         style="max-width:900px;" role="alert">
+        <span th:text="${itemError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-5" style="max-width:900px;">
+
+        <!-- LEFT: Menu details -->
+        <div class="col-lg-5">
+            <span class="veil-eyebrow mb-3 d-block">Menu Details</span>
+            <div class="form-panel">
+                <form th:action="@{/menus/{id}/edit(id=${menu.id})}"
+                      th:object="${formRequest}"
+                      method="post"
+                      novalidate
+                      id="editForm">
+
+                    <div class="mb-4">
+                        <label class="veil-label" for="name">
+                            Menu Name <span style="color:var(--gold);">*</span>
+                        </label>
+                        <input type="text" id="name" th:field="*{name}"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               class="form-control veil-input"/>
+                        <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
+                            <span th:errors="*{name}"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="veil-label" for="description">
+                            Description <span style="color:var(--cream-dim); font-size:0.55rem;">(optional)</span>
+                        </label>
+                        <textarea id="description" th:field="*{description}"
+                                  class="form-control veil-input" rows="4"
+                                  placeholder="A brief description of this menu…"></textarea>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="submit" class="btn btn-veil-primary">Save Changes</button>
+                        <a th:href="@{/menus/{id}(id=${menu.id})}" class="btn btn-veil-ghost">Cancel</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT: Menu items -->
+        <div class="col-lg-7">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="veil-eyebrow">Menu Items</span>
+                <span class="veil-eyebrow"
+                      th:if="${!#lists.isEmpty(menuItems)}"
+                      th:text="${#lists.size(menuItems)} + ' item' + (${#lists.size(menuItems)} != 1 ? 's' : '')">
+                </span>
+            </div>
+
+            <!-- Items list -->
+            <div th:if="${!#lists.isEmpty(menuItems)}" class="d-flex flex-column gap-0 mb-0">
+                <th:block th:each="item, iter : ${menuItems}">
+                    <div class="menu-item-row">
+                        <span class="menu-item-row-name" th:text="${item.name}"></span>
+                        <span class="menu-item-row-desc" th:text="${item.description}"></span>
+                        <div class="menu-item-row-actions">
+                            <a th:href="@{/menus/{menuId}/items/{itemId}/edit(menuId=${menu.id}, itemId=${item.id})}"
+                               class="btn btn-veil-sm edit" title="Edit Item">✎</a>
+                            <a th:href="@{/menus/{menuId}/items/{itemId}/delete(menuId=${menu.id}, itemId=${item.id})}"
+                               class="btn btn-veil-sm danger" title="Delete Item">⊘</a>
+                        </div>
+                    </div>
+                    <hr class="menu-item-rule" th:unless="${iter.last}"/>
+                </th:block>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(menuItems)}" class="items-empty">
+                <p>No items on this menu yet.<br>Add your first dish below.</p>
+            </div>
+
+            <!-- Add item form -->
+            <div class="add-item-panel" id="addItemForm">
+                <span class="add-item-panel-title">Add Menu Item</span>
+                <form th:action="@{/menus/{id}/items(id=${menu.id})}"
+                      th:object="${newMenuItem}"
+                      method="post"
+                      novalidate>
+
+                    <div class="mb-3">
+                        <label class="veil-label" for="itemName">
+                            Item Name <span style="color:var(--gold);">*</span>
+                        </label>
+                        <input type="text" id="itemName" th:field="*{name}"
+                               class="form-control veil-input"
+                               placeholder="e.g. Seared Scallops"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="veil-label" for="itemDescription">
+                            Description <span style="color:var(--gold);">*</span>
+                        </label>
+                        <textarea id="itemDescription" th:field="*{description}"
+                                  class="form-control veil-input" rows="2"
+                                  placeholder="e.g. With cauliflower purée and crispy capers"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-veil-primary">+ Add Item</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let formDirty = false;
+    const form = document.getElementById('editForm');
+    const indicator = document.getElementById('dirtyIndicator');
+
+    form.querySelectorAll('input, textarea').forEach(function(field) {
+        field.addEventListener('input', function() { formDirty = true; indicator.classList.add('visible'); });
+    });
+    form.addEventListener('submit', function() { formDirty = false; });
+    window.addEventListener('beforeunload', function(e) {
+        if (formDirty) { e.preventDefault(); }
+    });
+
+    const itemFormError = /*[[${itemFormError}]]*/ false;
+    if (itemFormError) {
+        document.getElementById('addItemForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+</script>
+</body>
+</html>

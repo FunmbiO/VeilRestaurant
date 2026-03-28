@@ -1,6 +1,8 @@
 package nbcc.resto.repository;
 
 import nbcc.resto.entity.Event;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +18,7 @@ public interface EventRepository {
 
     // US6 - Update: check name uniqueness excluding the current event
     boolean existsByNameAndIdNot(String name, Long id);
+
+    // US7 - Search Events
+    List<Event> searchEvents(String name, LocalDateTime startDate, LocalDateTime endDate);
 }

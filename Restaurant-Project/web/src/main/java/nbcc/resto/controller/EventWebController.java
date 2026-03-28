@@ -6,6 +6,7 @@ import nbcc.resto.dto.UpdateEventRequest;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.request.UpdateEventWebRequest;
 import nbcc.resto.service.EventService;
+import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,11 +22,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class EventWebController {
 
     private final EventService eventService;
+    private final MenuService menuService;
 
-    public EventWebController(EventService eventService) {
+
+    public EventWebController(EventService eventService, MenuService menuService) {
+
         this.eventService = eventService;
+        this.menuService = menuService;
     }
-
     // US5 - Delete / Archive Event
 
     @GetMapping("/{id}/delete")
@@ -81,9 +85,11 @@ public class EventWebController {
             formRequest.setDurationMinutes(event.getDurationMinutes());
             formRequest.setPrice(event.getPrice());
             formRequest.setActive(event.isActive());
+            formRequest.setMenuId(event.getMenuId());   // add this
 
             model.addAttribute("event", event);
             model.addAttribute("formRequest", formRequest);
+            model.addAttribute("menus", menuService.getAllMenus());  // add this
             return "events/edit";
 
         } catch (EventNotFoundException e) {
@@ -102,6 +108,7 @@ public class EventWebController {
             try {
                 EventDTO event = eventService.getEventById(id);
                 model.addAttribute("event", event);
+                model.addAttribute("menus", menuService.getAllMenus());  // add this
             } catch (EventNotFoundException e) {
                 return "redirect:/events?error=notfound";
             }
@@ -109,8 +116,6 @@ public class EventWebController {
         }
 
         try {
-            // Map web layer request → application layer request
-            // This breaks the module cycle: application must not depend on web
             UpdateEventRequest req = new UpdateEventRequest();
             req.setName(formRequest.getName());
             req.setDescription(formRequest.getDescription());
@@ -119,6 +124,7 @@ public class EventWebController {
             req.setDurationMinutes(formRequest.getDurationMinutes());
             req.setPrice(formRequest.getPrice());
             req.setActive(formRequest.isActive());
+            req.setMenuId(formRequest.getMenuId());   // add this
 
             eventService.updateEvent(id, req);
             redirectAttributes.addFlashAttribute("successMessage", "Event updated successfully.");
@@ -133,6 +139,7 @@ public class EventWebController {
             try {
                 EventDTO event = eventService.getEventById(id);
                 model.addAttribute("event", event);
+                model.addAttribute("menus", menuService.getAllMenus());  // add this
             } catch (EventNotFoundException notFound) {
                 return "redirect:/events?error=notfound";
             }

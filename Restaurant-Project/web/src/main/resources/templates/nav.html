@@ -1,13 +1,12 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<body>
-
-<!-- login.html references ~{nav :: nav} -->
-<nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+<!-- nav.html - NO DOCTYPE, NO html/body tags, just the fragment -->
+<nav th:fragment="navbar"
+     class="navbar navbar-expand-lg veil-nav"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Pop-Up Restaurant</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <a class="navbar-brand" href="/">Veil</a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -21,73 +20,35 @@
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" href="/events/new">Create Event</a>
                 </li>
-            </ul>
-            <ul class="navbar-nav ms-auto" sec:authorize="!isAuthenticated()">
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/menus">Menus</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register">Register</a>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/menus/new">Create Menu</a>
                 </li>
             </ul>
-            <ul class="navbar-nav ms-auto" sec:authorize="isAuthenticated()">
+            <ul class="navbar-nav ms-auto align-items-center gap-2"
+                sec:authorize="!isAuthenticated()">
+                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
                 <li class="nav-item">
-                    <span class="nav-link text-light">
-                        Hello, <strong sec:authentication="name"></strong>
+                    <a href="/register" class="btn btn-nav-cta">Join Veil</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto align-items-center gap-2"
+                sec:authorize="isAuthenticated()">
+                <li class="nav-item">
+                    <span class="nav-link"
+                          style="color: var(--cream-dim); font-size:0.72rem; letter-spacing:0.08em;">
+                        Welcome, <strong sec:authentication="name"></strong>
                     </span>
                 </li>
                 <li class="nav-item">
                     <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-light btn-sm ms-2">Logout</button>
+                        <button type="submit"
+                                class="btn btn-veil-ghost btn-veil-sm">Logout</button>
                     </form>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-
-<!-- register.html references ~{nav :: navbar} -->
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Pop-Up Restaurant</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav2">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav2">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/events">Events</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/events/new">Create Event</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto" sec:authorize="!isAuthenticated()">
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register">Register</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto" sec:authorize="isAuthenticated()">
-                <li class="nav-item">
-                    <span class="nav-link text-light">
-                        Hello, <strong sec:authentication="name"></strong>
-                    </span>
-                </li>
-                <li class="nav-item">
-                    <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-light btn-sm ms-2">Logout</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-</body>
-</html>

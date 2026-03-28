@@ -3,90 +3,155 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="'Confirm ' + (${willBeArchived} ? 'Archive' : 'Delete') + ' - Pop-Up Restaurant'">Confirm Delete</title>
+    <title th:text="'Confirm ' + (${willBeArchived} ? 'Archive' : 'Delete') + ' — Veil'">Confirm — Veil</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        .confirm-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .confirm-icon.archive { color: var(--gold-dim); }
+        .confirm-icon.delete  { color: rgba(192,57,43,0.7); }
+
+        .event-summary {
+            background: var(--charcoal);
+            border: 0.5px solid rgba(201,168,76,0.1);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .summary-row {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding: 0.6rem 0;
+            border-bottom: 0.5px solid rgba(201,168,76,0.07);
+            font-size: 0.82rem;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: var(--gold-dim); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; }
+        .summary-value { color: var(--cream); }
+
+        .consequence-box {
+            border-left: 3px solid;
+            padding: 1rem 1.2rem;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        .consequence-box.archive {
+            border-color: var(--gold-dim);
+            background: rgba(201,168,76,0.05);
+            color: var(--cream-dim);
+        }
+        .consequence-box.archive strong { color: var(--gold); }
+        .consequence-box.delete {
+            border-color: rgba(192,57,43,0.6);
+            background: rgba(192,57,43,0.06);
+            color: var(--cream-dim);
+        }
+        .consequence-box.delete strong { color: #e07070; }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<div class="container mt-4" style="max-width: 720px;">
+<div class="veil-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
 
-    <div class="mb-3">
-        <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-outline-secondary btn-sm">&larr; Back to Event</a>
-    </div>
+                <!-- Back -->
+                <div class="mb-4">
+                    <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-veil-sm back">← Back to Event</a>
+                </div>
 
-    <!-- Page heading changes based on archive vs delete -->
-    <div class="card border-danger">
-        <div class="card-header bg-danger text-white">
-            <h4 class="mb-0" th:if="${willBeArchived}">Archive Event</h4>
-            <h4 class="mb-0" th:unless="${willBeArchived}">Delete Event</h4>
+                <!-- Header -->
+                <div class="mb-3">
+                    <span th:if="${willBeArchived}" class="confirm-icon archive">⊙</span>
+                    <span th:unless="${willBeArchived}" class="confirm-icon delete">⊘</span>
+                    <span class="veil-eyebrow" th:text="${willBeArchived} ? 'Archive Event' : 'Delete Event'"></span>
+                    <h1 class="veil-title" style="font-size:2rem;">
+                        <span th:if="${willBeArchived}">Archive this <em>evening?</em></span>
+                        <span th:unless="${willBeArchived}">Delete this <em>evening?</em></span>
+                    </h1>
+                </div>
+
+                <!-- Consequence explanation -->
+                <div th:if="${willBeArchived}" class="consequence-box archive">
+                    <strong>This event is in the past.</strong>
+                    It will be <strong>archived</strong> — removed from the active events list and hidden from guests,
+                    but its record will be preserved for your records.
+                </div>
+                <div th:unless="${willBeArchived}" class="consequence-box delete">
+                    <strong>This event is scheduled in the future.</strong>
+                    It will be <strong>permanently deleted</strong> and cannot be recovered.
+                    Guests will no longer be able to request reservations for it.
+                </div>
+
+                <div class="veil-card card">
+                    <div class="card-header">
+                        <h5 class="mb-0" style="font-size:0.72rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold-dim);">
+                            Event Summary
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="event-summary" style="margin:0; border:none;">
+                            <div class="summary-row">
+                                <span class="summary-label">Name</span>
+                                <span class="summary-value" th:text="${event.name}"></span>
+                            </div>
+                            <div class="summary-row"
+                                 th:if="${event.description != null and !event.description.isEmpty()}">
+                                <span class="summary-label">Description</span>
+                                <span class="summary-value" th:text="${event.description}"
+                                      style="max-width:280px; text-align:right;"></span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Start Date</span>
+                                <span class="summary-value"
+                                      th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">End Date</span>
+                                <span class="summary-value"
+                                      th:text="${#temporals.format(event.endDate, 'MMMM dd, yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Price</span>
+                                <span class="summary-value"
+                                      th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Status</span>
+                                <span>
+                                    <span th:if="${event.active}" class="veil-badge badge active">Active</span>
+                                    <span th:unless="${event.active}" class="veil-badge badge inactive">Inactive</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="d-flex gap-2 mt-4">
+                    <form th:action="@{/events/{id}/delete(id=${event.id})}" method="post">
+                        <button type="submit" class="btn btn-veil-danger"
+                                th:text="${willBeArchived} ? 'Confirm Archive' : 'Confirm Delete'">
+                            Confirm Delete
+                        </button>
+                    </form>
+                    <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-veil-ghost">Cancel</a>
+                </div>
+
+            </div>
         </div>
-        <div class="card-body">
-
-            <!-- Archive vs Delete explanation -->
-            <div class="alert alert-warning" th:if="${willBeArchived}">
-                <strong>This event is in the past.</strong>
-                It will be <strong>archived</strong> rather than deleted — it will no longer appear
-                to guests or in the active events list, but its record will be kept.
-            </div>
-            <div class="alert alert-danger" th:unless="${willBeArchived}">
-                <strong>This event is scheduled in the future.</strong>
-                It will be <strong>permanently deleted</strong> and cannot be recovered.
-                Guests will no longer be able to request reservations for it.
-            </div>
-
-            <!-- Event details summary -->
-            <h5 class="mb-3">Event Details</h5>
-            <table class="table table-bordered table-sm">
-                <tbody>
-                <tr>
-                    <th class="w-25 table-light">Name</th>
-                    <td th:text="${event.name}"></td>
-                </tr>
-                <tr th:if="${event.description != null and !event.description.isEmpty()}">
-                    <th class="table-light">Description</th>
-                    <td th:text="${event.description}"></td>
-                </tr>
-                <tr>
-                    <th class="table-light">Start Date</th>
-                    <td th:text="${#temporals.format(event.startDate, 'MMMM dd, yyyy HH:mm')}"></td>
-                </tr>
-                <tr>
-                    <th class="table-light">End Date</th>
-                    <td th:text="${#temporals.format(event.endDate, 'MMMM dd, yyyy HH:mm')}"></td>
-                </tr>
-                <tr>
-                    <th class="table-light">Price</th>
-                    <td th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></td>
-                </tr>
-                <tr>
-                    <th class="table-light">Status</th>
-                    <td>
-                        <span th:if="${event.active}" class="badge bg-success">Active</span>
-                        <span th:unless="${event.active}" class="badge bg-secondary">Inactive</span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
-            <!-- Confirm / Cancel buttons -->
-            <div class="d-flex gap-2 mt-4">
-                <form th:action="@{/events/{id}/delete(id=${event.id})}" method="post">
-                    <button type="submit" class="btn btn-danger"
-                            th:text="${willBeArchived} ? 'Confirm Archive' : 'Confirm Delete'">
-                        Confirm Delete
-                    </button>
-                </form>
-                <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-outline-secondary">
-                    Cancel
-                </a>
-            </div>
-
-        </div>
     </div>
-
 </div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

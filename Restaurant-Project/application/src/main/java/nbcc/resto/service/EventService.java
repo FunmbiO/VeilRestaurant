@@ -2,12 +2,14 @@ package nbcc.resto.service;
 
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
+import nbcc.resto.dto.EventSearchCriteria;
 import nbcc.resto.dto.UpdateEventRequest;
 import nbcc.resto.entity.Event;
 import nbcc.resto.exception.DuplicateEventNameException;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.exception.InvalidEventException;
 import nbcc.resto.repository.EventRepository;
+import nbcc.resto.repository.MenuRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +22,31 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final MenuRepository menuRepository;
 
-    public EventService(@Qualifier("eventRepositoryImpl") EventRepository eventRepository) {
+    public EventService(@Qualifier("eventRepositoryImpl") EventRepository eventRepository,
+                        MenuRepository menuRepository) {
         this.eventRepository = eventRepository;
+        this.menuRepository  = menuRepository;
     }
+
+    // Helpers
+
+    /** Resolves menu name for display; safe if menuId is null or not found. */
+    private String resolveMenuName(Long menuId) {
+        if (menuId == null) return null;
+        return menuRepository.findById(menuId)
+                .map(m -> m.getName())
+                .orElse(null);
+    }
+
+    private EventDTO toDTO(Event event) {
+        EventDTO dto = EventDTO.from(event);
+        dto.setMenuName(resolveMenuName(event.getMenuId()));
+        return dto;
+    }
+
+    // Create
 
     @Transactional
     public EventDTO createEvent(CreateEventRequest request) {
@@ -43,6 +66,11 @@ public class EventService {
             throw new DuplicateEventNameException(request.getName());
         }
 
+        // US2 - cannot be active/live without a menu
+        if (request.isActive() && request.getMenuId() == null) {
+            throw new InvalidEventException("A menu must be selected before marking an event as active.");
+        }
+
         Event event = new Event(
                 request.getName(),
                 request.getDescription(),
@@ -52,6 +80,7 @@ public class EventService {
                 request.getPrice(),
                 request.isActive()
         );
+        event.setMenuId(request.getMenuId());
 
         if (!event.isDateRangeValid()) {
             throw new InvalidEventException("End date must be on or after start date.");
@@ -62,14 +91,16 @@ public class EventService {
 
         event.setCreatedDate(LocalDateTime.now());
         event.setUpdatedDate(LocalDateTime.now());
-        return EventDTO.from(eventRepository.save(event));
+        return toDTO(eventRepository.save(event));
     }
+
+    // Read
 
     @Transactional(readOnly = true)
     public List<EventDTO> getAllActiveEvents() {
         return eventRepository.findAllActive()
                 .stream()
-                .map(EventDTO::from)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -77,12 +108,10 @@ public class EventService {
     public EventDTO getEventById(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
-        return EventDTO.from(event);
+        return toDTO(event);
     }
 
-    // -------------------------------------------------------------------------
-    // US5 - Delete / Archive Event
-    // -------------------------------------------------------------------------
+    // Delete / Archive
 
     @Transactional(readOnly = true)
     public boolean isEventInPast(Long id) {
@@ -109,9 +138,7 @@ public class EventService {
         return isPast;
     }
 
-    // -------------------------------------------------------------------------
-    // US6 - Update / Edit Event
-    // -------------------------------------------------------------------------
+    // Update
 
     @Transactional
     public EventDTO updateEvent(Long id, UpdateEventRequest request) {
@@ -130,19 +157,19 @@ public class EventService {
         if (request.getPrice() == null) {
             throw new InvalidEventException("Price is required.");
         }
-
         if (eventRepository.existsByNameAndIdNot(request.getName(), id)) {
             throw new DuplicateEventNameException(request.getName());
         }
 
+        // US2 - cannot be active/live without a menu
+        if (request.isActive() && request.getMenuId() == null) {
+            throw new InvalidEventException("A menu must be selected before marking an event as active.");
+        }
+
         Event temp = new Event(
-                request.getName(),
-                request.getDescription(),
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getDurationMinutes(),
-                request.getPrice(),
-                request.isActive()
+                request.getName(), request.getDescription(),
+                request.getStartDate(), request.getEndDate(),
+                request.getDurationMinutes(), request.getPrice(), request.isActive()
         );
         if (!temp.isDateRangeValid()) {
             throw new InvalidEventException("End date must be on or after start date.");
@@ -158,8 +185,37 @@ public class EventService {
         event.setDurationMinutes(request.getDurationMinutes());
         event.setPrice(request.getPrice());
         event.setActive(request.isActive());
+        event.setMenuId(request.getMenuId());
         event.setUpdatedDate(LocalDateTime.now());
 
-        return EventDTO.from(eventRepository.save(event));
+        return toDTO(eventRepository.save(event));
+    }
+
+    // Search
+
+    @Transactional(readOnly = true)
+    public List<EventDTO> searchEvents(EventSearchCriteria criteria) {
+        String name = (criteria.getName() == null || criteria.getName().isBlank())
+                ? null : criteria.getName().trim();
+
+        LocalDateTime from = null;
+        LocalDateTime to   = null;
+
+        if (criteria.getDateRangeFilter() != null) {
+            switch (criteria.getDateRangeFilter()) {
+                case "AFTER":  from = criteria.getStartDate(); break;
+                case "BEFORE": to   = criteria.getStartDate(); break;
+                case "BETWEEN":
+                    from = criteria.getStartDate();
+                    to   = criteria.getEndDate();
+                    break;
+                default: break;
+            }
+        }
+
+        return eventRepository.searchEvents(name, from, to)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 }

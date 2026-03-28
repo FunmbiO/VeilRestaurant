@@ -3,57 +3,153 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login - Pop-Up Restaurant</title>
+    <title>Login — Veil</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        body { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+
+        .login-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            flex: 1;
+            min-height: calc(100vh - 70px);
+        }
+        @media (max-width: 768px) { .login-wrap { grid-template-columns: 1fr; } }
+
+        /* Art panel */
+        .login-art {
+            background: var(--charcoal);
+            border-right: 0.5px solid rgba(201,168,76,0.15);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 4rem; text-align: center; position: relative; overflow: hidden;
+        }
+        .login-art-glow {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 35%, rgba(201,168,76,0.08) 0%, transparent 65%);
+        }
+        .login-art-content { position: relative; z-index: 1; }
+        .login-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem; color: var(--gold);
+            display: block; letter-spacing: 0.3em; font-style: italic; margin-bottom: 0.3rem;
+        }
+        .login-tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.82rem; color: var(--cream-dim);
+            letter-spacing: 0.25em; text-transform: uppercase;
+            font-weight: 300; margin-bottom: 4rem;
+        }
+        .login-quote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem; font-style: italic;
+            color: var(--cream); line-height: 1.55;
+            max-width: 300px; margin: 0 auto 1rem;
+        }
+        .login-attr { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); }
+        .login-vlines {
+            display: flex; gap: 8px; justify-content: center; margin-top: 3rem;
+        }
+        .login-vlines span {
+            width: 0.5px; display: block;
+            background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.28), transparent);
+        }
+
+        /* Form panel */
+        .login-form-panel {
+            background: var(--black);
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 4rem 5rem;
+        }
+        @media (max-width: 992px) { .login-form-panel { padding: 3rem 2.5rem; } }
+
+        .login-eyebrow { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+        .login-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--cream);
+        }
+        .login-subtitle { font-size: 0.79rem; color: var(--cream-dim); margin-bottom: 2.5rem; line-height: 1.65; }
+
+        .login-divider {
+            display: flex; align-items: center; gap: 1rem;
+            font-size: 0.6rem; color: var(--gold-dim); letter-spacing: 0.12em;
+            margin: 1.2rem 0;
+        }
+        .login-divider::before, .login-divider::after {
+            content: ''; flex: 1; height: 0.5px; background: rgba(201,168,76,0.14);
+        }
+        .login-register {
+            text-align: center; font-size: 0.74rem; color: var(--cream-dim); margin-top: 1.5rem;
+        }
+        .login-register a { color: var(--gold); text-decoration: none; }
+        .login-register a:hover { color: var(--gold-light); }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-4">
+<div class="login-wrap">
 
-            <div class="card">
-                <div class="card-header bg-dark text-white text-center">
-                    <h4 class="mb-0">Login</h4>
-                </div>
-                <div class="card-body p-4">
+    <!-- Art panel -->
+    <div class="login-art d-none d-md-flex">
+        <div class="login-art-glow"></div>
+        <div class="login-art-content">
+            <span class="login-logo">Veil</span>
+            <span class="login-tagline">Where evenings become legend</span>
+            <p class="login-quote">"To eat is a necessity, but to eat intelligently is an art."</p>
+            <span class="login-attr">— François de la Rochefoucauld</span>
+            <div class="login-vlines">
+                <span style="height:30px;opacity:0.3"></span>
+                <span style="height:50px;opacity:0.5"></span>
+                <span style="height:70px;opacity:0.65"></span>
+                <span style="height:88px;opacity:0.85"></span>
+                <span style="height:70px;opacity:0.65"></span>
+                <span style="height:50px;opacity:0.5"></span>
+                <span style="height:30px;opacity:0.3"></span>
+            </div>
+        </div>
+    </div>
 
-                    <div th:if="${param.error}" class="alert alert-danger text-center">
-                        Invalid username or password.
-                    </div>
-                    <div th:if="${param.logout}" class="alert alert-secondary text-center">
-                        You have been logged out.
-                    </div>
+    <!-- Form panel -->
+    <div class="login-form-panel">
+        <div class="login-eyebrow">Member Portal</div>
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to access your reservations and receive early notice of upcoming events.</p>
 
-                    <form th:action="@{/login}" method="post">
+        <div th:if="${param.error}" class="alert veil-alert error alert-dismissible" role="alert">
+            Invalid username or password. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${param.logout}" class="alert veil-alert warning alert-dismissible" role="alert">
+            You have been signed out of Veil.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Username</label>
-                            <input type="text" name="username"
-                                   th:value="${param.username}"
-                                   class="form-control" placeholder="Enter username" required/>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password"
-                                   class="form-control" placeholder="Enter password" required/>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-dark">Login</button>
-                        </div>
-
-                    </form>
-
-                </div>
-                <div class="card-footer text-center text-muted">
-                    Don't have an account? <a href="/register" class="text-dark">Register</a>
-                </div>
+        <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+                <label class="veil-label">Username</label>
+                <input type="text" name="username"
+                       th:value="${param.username}"
+                       class="form-control veil-input"
+                       placeholder="Enter your username" required/>
+            </div>
+            <div class="mb-4">
+                <label class="veil-label">Password</label>
+                <input type="password" name="password"
+                       class="form-control veil-input"
+                       placeholder="••••••••••" required/>
             </div>
 
+            <button type="submit" class="btn btn-veil-primary w-100">Sign In to Veil</button>
+        </form>
+
+        <div class="login-divider">or</div>
+        <a href="/events" class="btn btn-veil-ghost w-100">Browse Events as Guest</a>
+
+        <div class="login-register">
+            Not yet a member? <a href="/register">Request an invitation →</a>
         </div>
     </div>
 </div>

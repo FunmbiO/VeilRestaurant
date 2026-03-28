@@ -1,23 +1,212 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{partial :: bootstrap}"/>
+<head>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <title>Veil — Luxury Pop-Up Dining</title>
+    <style>
+        .hero {
+            min-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 0 4rem;
+            position: relative;
+            overflow: hidden;
+            background: var(--black);
+        }
 
+        /* ── Video background ── */
+        .hero-video {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Dark overlay — increase alpha values to darken, decrease to lighten ── */
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                    135deg,
+                    rgba(8, 7, 5, 0.72) 0%,
+                    rgba(8, 7, 5, 0.50) 50%,
+                    rgba(8, 7, 5, 0.68) 100%
+            );
+            z-index: 1;
+        }
+
+        /* Everything inside hero sits above video + overlay */
+        .hero-corner,
+        .hero-corner-bl,
+        .hero-vlines,
+        .hero .container,
+        .hero-stat { position: relative; z-index: 2; }
+
+        .hero-corner {
+            position: absolute; top: 4rem; right: 4rem;
+            width: 160px; height: 160px;
+            border-top: 0.5px solid rgba(201,168,76,0.18);
+            border-right: 0.5px solid rgba(201,168,76,0.18);
+        }
+        .hero-corner-bl {
+            position: absolute; bottom: 4rem; left: 2rem;
+            width: 80px; height: 80px;
+            border-bottom: 0.5px solid rgba(201,168,76,0.12);
+            border-left: 0.5px solid rgba(201,168,76,0.12);
+        }
+        .hero-vlines {
+            position: absolute; right: 9%; top: 50%; transform: translateY(-50%);
+            display: flex; gap: 7px; pointer-events: none;
+        }
+        .hero-vlines span {
+            width: 0.5px; display: block;
+            background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.2), transparent);
+        }
+        .hero-eyebrow {
+            display: flex; align-items: center; gap: 1rem;
+            font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 1.6rem;
+        }
+        .hero-eyebrow::before {
+            content: ''; display: block; width: 32px; height: 0.5px; background: var(--gold);
+        }
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 5.5vw, 6rem);
+            line-height: 1.0; font-weight: 700; max-width: 680px;
+            color: var(--cream);
+        }
+        .hero-title em { font-style: italic; color: var(--gold); }
+        .hero-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem; font-weight: 300; color: var(--cream-dim);
+            max-width: 420px; line-height: 1.65; margin: 1.5rem 0 2.8rem;
+        }
+        .hero-stat {
+            position: absolute; bottom: 4rem; right: 4rem;
+            border: 0.5px solid rgba(201,168,76,0.22); padding: 1.4rem;
+            width: 130px; height: 130px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
+        }
+        .hero-stat-num {
+            font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--gold); line-height: 1;
+        }
+        .hero-stat-lbl {
+            font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--cream-dim); text-align: center; line-height: 1.5;
+        }
+        .pillars { background: var(--off-black); border-top: 0.5px solid rgba(201,168,76,0.1); }
+        .pillar {
+            padding: 2.8rem 2rem;
+            border-right: 0.5px solid rgba(201,168,76,0.08);
+            transition: background 0.3s;
+        }
+        .pillar:last-child { border-right: none; }
+        .pillar:hover { background: rgba(201,168,76,0.03); }
+        .pillar-icon { font-size: 1rem; color: var(--gold); display: block; margin-bottom: 1.1rem; }
+        .pillar-title {
+            font-family: 'Playfair Display', serif; font-size: 1.15rem;
+            margin-bottom: 0.6rem; color: var(--cream);
+        }
+        .pillar-desc { font-size: 0.77rem; line-height: 1.85; color: var(--cream-dim); }
+
+        .cta-strip {
+            background: var(--charcoal);
+            border-top: 0.5px solid rgba(201,168,76,0.12);
+            border-bottom: 0.5px solid rgba(201,168,76,0.12);
+        }
+        .cta-strip h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; line-height: 1.1; }
+        .cta-strip h2 em { color: var(--gold); font-style: italic; }
+        .cta-strip p { font-size: 0.8rem; color: var(--cream-dim); max-width: 360px; line-height: 1.8; margin-top: 0.75rem; }
+    </style>
+</head>
 <body>
 
 <div th:replace="~{nav :: navbar}"></div>
+
 <!-- Hero -->
-<div class="container mt-5 text-center">
-    <img src="/images/logo.png" alt="Restaurant Logo" class="mb-4"
-         style="max-width: 150px;"
-         onerror="this.style.display='none'"/>
-    <h1 class="display-4 fw-bold">Pop-Up Restaurant</h1>
-    <p class="lead text-muted">Welcome! Discover and manage our upcoming events.</p>
-    <hr class="my-4"/>
-    <div class="d-flex justify-content-center gap-3">
-        <a href="/events" class="btn btn-dark btn-lg">View Events</a>
-        <a href="/events/new" class="btn btn-outline-dark btn-lg">Create Event</a>
+<section class="hero">
+
+    <!-- Background video: autoplay, muted, looping, no controls -->
+    <video class="hero-video"
+           autoplay muted loop playsinline preload="auto">
+        <source th:src="@{/videos/hero.mp4}" type="video/mp4"/>
+    </video>
+
+    <!-- Semi-transparent overlay sits between video and text -->
+    <div class="hero-overlay"></div>
+
+    <div class="hero-corner"></div>
+    <div class="hero-corner-bl"></div>
+    <div class="hero-vlines">
+        <span style="height:160px;opacity:0.3"></span>
+        <span style="height:240px;opacity:0.5"></span>
+        <span style="height:310px;opacity:0.7"></span>
+        <span style="height:240px;opacity:0.5"></span>
+        <span style="height:160px;opacity:0.3"></span>
+    </div>
+    <div class="container">
+        <div class="hero-eyebrow">Luxury pop-up dining</div>
+        <h1 class="hero-title">
+            Beneath the<br><em>veil</em>, a world<br>awaits
+        </h1>
+        <p class="hero-sub">An intimate, ever-shifting culinary experience in hidden locations — for those who know where to look.</p>
+        <div class="d-flex gap-3 flex-wrap">
+            <a href="/events" class="btn btn-veil-primary">Browse Events</a>
+            <a href="/register" class="btn btn-veil-ghost">Request Membership</a>
+        </div>
+        <div class="hero-stat d-none d-lg-flex">
+            <span class="hero-stat-num">12</span>
+            <span class="hero-stat-lbl">Seats per evening</span>
+        </div>
+    </div>
+</section>
+
+<hr class="veil-rule m-0">
+
+<!-- Pillars -->
+<div class="pillars">
+    <div class="container">
+        <div class="row g-0">
+            <div class="col-md-4 pillar">
+                <span class="pillar-icon">◈</span>
+                <h3 class="pillar-title">Hidden Locations</h3>
+                <p class="pillar-desc">Every event unfolds in a secret venue — revealed only 48 hours before the evening. Rooftops, cellars, private estates.</p>
+            </div>
+            <div class="col-md-4 pillar">
+                <span class="pillar-icon">◈</span>
+                <h3 class="pillar-title">Curated Experiences</h3>
+                <p class="pillar-desc">From six-course tasting evenings to intimate chef's table sessions. Each event is a singular, unrepeatable moment.</p>
+            </div>
+            <div class="col-md-4 pillar">
+                <span class="pillar-icon">◈</span>
+                <h3 class="pillar-title">By Invitation Only</h3>
+                <p class="pillar-desc">Membership is selective. Access is earned. Members receive first notice of every new event before the public.</p>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- CTA strip -->
+<div class="cta-strip py-5">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-4">
+        <div>
+            <span class="veil-eyebrow">Limited availability</span>
+            <h2 class="veil-title">Your table is <em>waiting</em></h2>
+            <p>Events fill within hours of release. Become a Veil member and receive advance access before each announcement.</p>
+        </div>
+        <a href="/events" class="btn btn-veil-primary">View Upcoming Events</a>
+    </div>
+</div>
+
+<footer class="veil-footer">
+    <div class="container">
+        © 2025 Veil. All rights reserved. &nbsp;·&nbsp; A luxury pop-up dining experience.
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -3,8 +3,10 @@ package nbcc.resto.controller;
 import jakarta.validation.Valid;
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
+import nbcc.resto.dto.EventSearchCriteria;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.service.EventService;
+import nbcc.resto.service.MenuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,17 +25,36 @@ import java.util.List;
 public class EventViewController {
 
     private final EventService eventService;
+    private final MenuService menuService;
 
-    public EventViewController(EventService eventService) {
+
+    public EventViewController(EventService eventService, MenuService menuService) {
+
         this.eventService = eventService;
+        this.menuService = menuService;
     }
 
     // LIST EVENTS  GET /events
     @GetMapping("/events")
-    public String listEvents(Model model) {
-        List<EventDTO> events = eventService.getAllActiveEvents();
+    public String listEvents(@ModelAttribute EventSearchCriteria criteria, Model model) {
+        boolean searchActive = isSearchActive(criteria);
+        List<EventDTO> events = searchActive
+                ? eventService.searchEvents(criteria)
+                : eventService.getAllActiveEvents();
+
         model.addAttribute("events", events);
+        model.addAttribute("criteria", criteria);
+        model.addAttribute("searchActive", searchActive);
+        model.addAttribute("resultCount", events.size());
         return "events/list";
+    }
+
+    private boolean isSearchActive(EventSearchCriteria criteria) {
+        boolean hasName = criteria.getName() != null && !criteria.getName().isBlank();
+        boolean hasDate = criteria.getStartDate() != null || criteria.getEndDate() != null;
+        boolean hasFilter = criteria.getDateRangeFilter() != null
+                && !criteria.getDateRangeFilter().equals("ALL");
+        return hasName || hasDate || hasFilter;
     }
 
     // EVENT DETAIL  GET /events/{id}
@@ -51,6 +72,7 @@ public class EventViewController {
     @GetMapping("/events/new")
     public String showCreateForm(Model model) {
         model.addAttribute("createEventRequest", new CreateEventRequest());
+        model.addAttribute("menus", menuService.getAllMenus());  // add this
         return "events/create";
     }
     // CREATE EVENT SUBMIT  POST /events/new

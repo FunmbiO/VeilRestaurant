@@ -4,6 +4,7 @@ import nbcc.resto.entity.Event;
 import nbcc.resto.repository.EventRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,5 +57,14 @@ public class EventRepositoryImpl implements EventRepository {
     @Override
     public boolean existsByNameAndIdNot(String name, Long id) {
         return jpaRepository.existsByNameAndIdNot(name, id);
+    }
+
+    // US7 - Search Events
+    @Override
+    public List<Event> searchEvents(String name, LocalDateTime startDate, LocalDateTime endDate) {
+        return jpaRepository.searchEvents(name, startDate, endDate)
+                .stream()
+                .map(EventJpaEntity::toDomain)
+                .collect(Collectors.toList());
     }
 }

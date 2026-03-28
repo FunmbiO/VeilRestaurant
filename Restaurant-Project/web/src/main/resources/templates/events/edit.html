@@ -3,161 +3,217 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="'Edit ' + ${event.name} + ' - Pop-Up Restaurant'">Edit Event</title>
+    <title th:text="'Edit ' + ${event.name} + ' — Veil'">Edit Event — Veil</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+    <style>
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7) sepia(0.5) saturate(2) hue-rotate(10deg); cursor: pointer;
+        }
+        .form-section-divider {
+            display: flex; align-items: center; gap: 1rem; margin: 2rem 0 1.5rem;
+        }
+        .form-section-divider span {
+            font-size: 0.56rem; letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--gold-dim); white-space: nowrap;
+        }
+        .form-section-divider::before, .form-section-divider::after {
+            content: ''; flex: 1; height: 0.5px; background: rgba(201,168,76,0.12);
+        }
+        .dirty-indicator {
+            display: none; font-size: 0.65rem; letter-spacing: 0.1em;
+            color: var(--gold); align-items: center; gap: 0.4rem;
+        }
+        .dirty-indicator.visible { display: flex; }
+        .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+        .menu-hint {
+            font-size: 0.68rem; color: var(--cream-dim);
+            margin-top: 0.4rem; font-style: italic;
+        }
+        .menu-hint.warning { color: #e0a070; }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{nav :: navbar}"></div>
 
-<div class="container mt-4" style="max-width: 720px;">
+<div class="veil-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
 
-    <div class="mb-3">
-        <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-outline-secondary btn-sm">&larr; Back to Event</a>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">Edit Event</h4>
-        </div>
-        <div class="card-body">
-
-            <!-- Service-level error message (e.g. duplicate name) -->
-            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-
-            <form th:action="@{/events/{id}/edit(id=${event.id})}"
-                  th:object="${formRequest}"
-                  method="post"
-                  novalidate>
-
-                <!-- Name -->
-                <div class="mb-3">
-                    <label for="name" class="form-label fw-semibold">Event Name <span class="text-danger">*</span></label>
-                    <input type="text"
-                           id="name"
-                           th:field="*{name}"
-                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                           class="form-control"
-                           placeholder="Enter event name"/>
-                    <div class="invalid-feedback" th:errors="*{name}"></div>
-                </div>
-
-                <!-- Description -->
-                <div class="mb-3">
-                    <label for="description" class="form-label fw-semibold">Description</label>
-                    <textarea id="description"
-                              th:field="*{description}"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Optional event description"></textarea>
-                </div>
-
-                <!-- Start Date -->
-                <div class="mb-3">
-                    <label for="startDate" class="form-label fw-semibold">Start Date <span class="text-danger">*</span></label>
-                    <input type="datetime-local"
-                           id="startDate"
-                           th:field="*{startDate}"
-                           th:classappend="${#fields.hasErrors('startDate')} ? 'is-invalid'"
-                           class="form-control"/>
-                    <div class="invalid-feedback" th:errors="*{startDate}"></div>
-                </div>
-
-                <!-- End Date -->
-                <div class="mb-3">
-                    <label for="endDate" class="form-label fw-semibold">End Date <span class="text-danger">*</span></label>
-                    <input type="datetime-local"
-                           id="endDate"
-                           th:field="*{endDate}"
-                           th:classappend="${#fields.hasErrors('endDate')} ? 'is-invalid'"
-                           class="form-control"/>
-                    <div class="invalid-feedback" th:errors="*{endDate}"></div>
-                </div>
-
-                <!-- Duration -->
-                <div class="mb-3">
-                    <label for="durationMinutes" class="form-label fw-semibold">Duration (minutes)</label>
-                    <input type="number"
-                           id="durationMinutes"
-                           th:field="*{durationMinutes}"
-                           th:classappend="${#fields.hasErrors('durationMinutes')} ? 'is-invalid'"
-                           class="form-control"
-                           min="1"
-                           placeholder="e.g. 90"/>
-                    <div class="invalid-feedback" th:errors="*{durationMinutes}"></div>
-                </div>
-
-                <!-- Price -->
-                <div class="mb-3">
-                    <label for="price" class="form-label fw-semibold">Price ($) <span class="text-danger">*</span></label>
-                    <input type="number"
-                           id="price"
-                           th:field="*{price}"
-                           th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
-                           class="form-control"
-                           step="0.01"
-                           min="0.01"
-                           placeholder="e.g. 75.00"/>
-                    <div class="invalid-feedback" th:errors="*{price}"></div>
-                </div>
-
-                <!-- Active toggle -->
+                <!-- Back + header -->
                 <div class="mb-4">
-                    <div class="form-check form-switch">
-                        <input type="checkbox"
-                               id="active"
-                               th:field="*{active}"
-                               class="form-check-input"
-                               role="switch"/>
-                        <label for="active" class="form-check-label fw-semibold">Active</label>
-                    </div>
-                    <div class="form-text text-muted">
-                        Active events are visible to guests for reservation requests.
+                    <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-veil-sm back mb-3">← Back to Event</a>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="veil-eyebrow">Editing</span>
+                            <h1 class="veil-title" th:text="${event.name}" style="font-size:2rem;"></h1>
+                        </div>
+                        <div id="dirtyIndicator" class="dirty-indicator">
+                            <span class="dirty-dot"></span> Unsaved changes
+                        </div>
                     </div>
                 </div>
 
-                <!-- Buttons -->
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-dark">Save Changes</button>
-                    <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-outline-secondary">
-                        Cancel
-                    </a>
+                <!-- Error message -->
+                <div th:if="${errorMessage}"
+                     class="alert veil-alert error alert-dismissible mb-4" role="alert">
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
-            </form>
+                <div class="veil-card card">
+                    <div class="card-body">
+
+                        <form th:action="@{/events/{id}/edit(id=${event.id})}"
+                              th:object="${formRequest}"
+                              method="post"
+                              novalidate
+                              id="editForm">
+
+                            <!-- Name -->
+                            <div class="mb-3">
+                                <label for="name" class="veil-label">
+                                    Event Name <span style="color:#e07070;">*</span>
+                                </label>
+                                <input type="text" id="name" th:field="*{name}"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                       class="form-control veil-input"
+                                       placeholder="Enter event name"/>
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="veil-label">Description</label>
+                                <textarea id="description" th:field="*{description}"
+                                          class="form-control veil-input" rows="3"
+                                          placeholder="Optional event description"></textarea>
+                            </div>
+
+                            <div class="form-section-divider"><span>Schedule</span></div>
+
+                            <!-- Start Date -->
+                            <div class="mb-3">
+                                <label for="startDate" class="veil-label">
+                                    Start Date <span style="color:#e07070;">*</span>
+                                </label>
+                                <input type="datetime-local" id="startDate" th:field="*{startDate}"
+                                       th:classappend="${#fields.hasErrors('startDate')} ? 'is-invalid'"
+                                       class="form-control veil-input"/>
+                                <div class="invalid-feedback" th:errors="*{startDate}"></div>
+                            </div>
+
+                            <!-- End Date -->
+                            <div class="mb-3">
+                                <label for="endDate" class="veil-label">
+                                    End Date <span style="color:#e07070;">*</span>
+                                </label>
+                                <input type="datetime-local" id="endDate" th:field="*{endDate}"
+                                       th:classappend="${#fields.hasErrors('endDate')} ? 'is-invalid'"
+                                       class="form-control veil-input"/>
+                                <div class="invalid-feedback" th:errors="*{endDate}"></div>
+                            </div>
+
+                            <!-- Duration -->
+                            <div class="mb-3">
+                                <label for="durationMinutes" class="veil-label">Duration (minutes)</label>
+                                <input type="number" id="durationMinutes" th:field="*{durationMinutes}"
+                                       th:classappend="${#fields.hasErrors('durationMinutes')} ? 'is-invalid'"
+                                       class="form-control veil-input" min="1" placeholder="e.g. 210"/>
+                                <div class="invalid-feedback" th:errors="*{durationMinutes}"></div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <label for="price" class="veil-label">
+                                    Price per Person ($) <span style="color:#e07070;">*</span>
+                                </label>
+                                <input type="number" id="price" th:field="*{price}"
+                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                                       class="form-control veil-input" step="0.01" min="0.01" placeholder="e.g. 320.00"/>
+                                <div class="invalid-feedback" th:errors="*{price}"></div>
+                            </div>
+
+                            <div class="form-section-divider"><span>Menu</span></div>
+
+                            <!-- Menu dropdown -->
+                            <div class="mb-3">
+                                <label for="menuId" class="veil-label">Menu Selection</label>
+
+                                <!-- No menus exist -->
+                                <div th:if="${#lists.isEmpty(menus)}">
+                                    <select class="form-select veil-input" disabled>
+                                        <option>No menus available</option>
+                                    </select>
+                                    <p class="menu-hint warning">
+                                        No menus have been created yet.
+                                        <a href="/menus/new" style="color:var(--gold);">Create a menu</a>
+                                        before marking this event as active.
+                                    </p>
+                                </div>
+
+                                <!-- Menus available — pre-select current menu -->
+                                <div th:unless="${#lists.isEmpty(menus)}">
+                                    <select id="menuId" th:field="*{menuId}" class="form-select veil-input">
+                                        <option value="">— No menu selected —</option>
+                                        <option th:each="menu : ${menus}"
+                                                th:value="${menu.id}"
+                                                th:text="${menu.name}"></option>
+                                    </select>
+                                    <p class="menu-hint">
+                                        A menu is required to mark this event as active.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-section-divider"><span>Visibility</span></div>
+
+                            <!-- Active toggle -->
+                            <div class="mb-4 ps-1">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="active" th:field="*{active}"
+                                           class="form-check-input" role="switch"/>
+                                    <label for="active" class="form-check-label">Active</label>
+                                </div>
+                                <div class="form-text">Active events are visible to guests. Requires a menu.</div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2 pt-2">
+                                <button type="submit" class="btn btn-veil-primary">Save Changes</button>
+                                <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-veil-ghost">Cancel</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-
 </div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Track whether the user has changed any form field
     let formDirty = false;
+    const form = document.getElementById('editForm');
+    const indicator = document.getElementById('dirtyIndicator');
 
-    const form = document.querySelector('form');
-
-    // Mark form as dirty when any input or select changes
     form.querySelectorAll('input, textarea, select').forEach(function(field) {
-        field.addEventListener('change', function() {
-            formDirty = true;
-        });
-        field.addEventListener('input', function() {
-            formDirty = true;
-        });
+        field.addEventListener('change', function() { formDirty = true; indicator.classList.add('visible'); });
+        field.addEventListener('input',  function() { formDirty = true; indicator.classList.add('visible'); });
     });
 
-    // When the form is submitted normally, clear the dirty flag so no warning shows
-    form.addEventListener('submit', function() {
-        formDirty = false;
-    });
+    form.addEventListener('submit', function() { formDirty = false; });
 
-    // Warn the user if they try to leave with unsaved changes
     window.addEventListener('beforeunload', function(e) {
-        if (formDirty) {
-            e.preventDefault();
-            e.returnValue = ''; // Required for Chrome to show the dialog
-        }
+        if (formDirty) { e.preventDefault(); e.returnValue = ''; }
     });
 </script>
 </body>

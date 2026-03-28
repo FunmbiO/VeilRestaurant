@@ -1,0 +1,393 @@
+/*
+   VEIL — Luxury Pop-Up Restaurant
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Montserrat:wght@300;400;500&display=swap');
+
+:root {
+    --gold:        #C9A84C;
+    --gold-light:  #E8C96A;
+    --gold-dim:    #7A5C20;
+    --gold-faint:  rgba(201,168,76,0.12);
+    --black:       #0A0A0A;
+    --black-soft:  #111111;
+    --off-black:   #161616;
+    --charcoal:    #1E1E1E;
+    --cream:       #F2E8D0;
+    --cream-dim:   #B8A880;
+    --danger-red:  #C0392B;
+}
+
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    background: var(--black) !important;
+    color: var(--cream) !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 300;
+    min-height: 100vh;
+}
+
+/* ─── Navbar ─── */
+.navbar.veil-nav {
+    background: rgba(10,10,10,0.97) !important;
+    border-bottom: 0.5px solid rgba(201,168,76,0.2);
+    padding: 1.1rem 2rem;
+    position: sticky; top: 0; z-index: 100;
+}
+.navbar.veil-nav .navbar-brand {
+    font-family: 'Playfair Display', serif !important;
+    font-size: 1.6rem !important;
+    color: var(--gold) !important;
+    font-style: italic;
+    letter-spacing: 0.25em;
+    font-weight: 400 !important;
+}
+.navbar.veil-nav .nav-link {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase;
+    color: var(--cream-dim) !important;
+    transition: color 0.3s;
+    padding: 0.4rem 0.9rem !important;
+}
+.navbar.veil-nav .nav-link:hover { color: var(--gold) !important; }
+.navbar.veil-nav .nav-link.text-light { color: var(--cream-dim) !important; }
+.navbar.veil-nav strong { color: var(--gold) !important; font-weight: 500; }
+
+.btn-nav-cta {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase;
+    color: var(--black) !important;
+    background: var(--gold) !important;
+    border: none !important;
+    padding: 0.5rem 1.3rem !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 500 !important;
+    border-radius: 0 !important;
+    transition: background 0.3s;
+}
+.btn-nav-cta:hover { background: var(--gold-light) !important; color: var(--black) !important; }
+
+.navbar-toggler { border-color: rgba(201,168,76,0.4) !important; }
+.navbar-toggler-icon { filter: invert(75%) sepia(30%) saturate(500%) hue-rotate(10deg); }
+
+/* ─── Page wrapper ─── */
+.veil-page {
+    min-height: calc(100vh - 70px);
+    padding: 3rem 0 5rem;
+}
+
+/* ─── Section titles ─── */
+.veil-eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.6rem;
+}
+.veil-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--cream);
+}
+.veil-title em { font-style: italic; color: var(--gold); }
+
+/* ─── Gold rule ─── */
+.veil-rule {
+    border: none;
+    height: 0.5px;
+    background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+    margin: 2rem 0;
+}
+
+/* ─── Cards ─── */
+.veil-card {
+    background: var(--off-black) !important;
+    border: 0.5px solid rgba(201,168,76,0.18) !important;
+    border-radius: 0 !important;
+    color: var(--cream) !important;
+}
+.veil-card .card-header {
+    background: var(--charcoal) !important;
+    border-bottom: 0.5px solid rgba(201,168,76,0.2) !important;
+    border-radius: 0 !important;
+    padding: 1.2rem 1.6rem;
+}
+.veil-card .card-header h3,
+.veil-card .card-header h4,
+.veil-card .card-header h5 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    color: var(--cream);
+}
+.veil-card .card-body { padding: 2rem; }
+.veil-card .card-footer {
+    background: var(--off-black) !important;
+    border-top: 0.5px solid rgba(201,168,76,0.12) !important;
+    border-radius: 0 !important;
+    padding: 1rem 1.6rem;
+}
+
+/* danger card */
+.veil-card.border-danger {
+    border-color: rgba(192,57,43,0.5) !important;
+}
+.veil-card .card-header.bg-danger {
+    background: rgba(192,57,43,0.85) !important;
+}
+
+/* ─── Form controls ─── */
+.veil-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+.veil-input,
+.form-control.veil-input,
+.form-select.veil-input {
+    background: var(--charcoal) !important;
+    border: 0.5px solid rgba(201,168,76,0.22) !important;
+    border-radius: 0 !important;
+    color: var(--cream) !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 300 !important;
+    padding: 0.75rem 1rem !important;
+    transition: border-color 0.3s;
+}
+.veil-input:focus {
+    border-color: rgba(201,168,76,0.55) !important;
+    background: var(--charcoal) !important;
+    box-shadow: none !important;
+    color: var(--cream) !important;
+}
+.veil-input::placeholder { color: rgba(201,168,76,0.25) !important; }
+.veil-input.is-invalid { border-color: rgba(192,57,43,0.7) !important; }
+.invalid-feedback { font-size: 0.72rem; color: #e07070; }
+
+/* Checkbox / switch */
+.form-check-input:checked {
+    background-color: var(--gold) !important;
+    border-color: var(--gold) !important;
+}
+.form-check-label { color: var(--cream-dim) !important; font-size: 0.82rem; }
+.form-text { color: var(--cream-dim) !important; font-size: 0.72rem; }
+
+/* ─── Buttons ─── */
+.btn-veil-primary {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    color: var(--black) !important;
+    background: var(--gold) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0.7rem 1.8rem !important;
+    transition: background 0.3s, transform 0.2s;
+}
+.btn-veil-primary:hover { background: var(--gold-light) !important; color: var(--black) !important; transform: translateY(-1px); }
+
+.btn-veil-ghost {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
+    font-weight: 300 !important;
+    color: var(--cream-dim) !important;
+    background: transparent !important;
+    border: 0.5px solid rgba(201,168,76,0.3) !important;
+    border-radius: 0 !important;
+    padding: 0.7rem 1.8rem !important;
+    transition: all 0.3s;
+}
+.btn-veil-ghost:hover { border-color: var(--gold) !important; color: var(--gold) !important; }
+
+.btn-veil-danger {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+    background: rgba(192,57,43,0.8) !important;
+    border: 0.5px solid rgba(192,57,43,0.6) !important;
+    border-radius: 0 !important;
+    padding: 0.7rem 1.8rem !important;
+    transition: background 0.3s;
+}
+.btn-veil-danger:hover { background: rgba(192,57,43,1) !important; color: #fff !important; }
+
+/* inline small action buttons */
+.btn-veil-sm {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    padding: 0.35rem 0.9rem !important;
+    border-radius: 0 !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 400 !important;
+    transition: all 0.2s;
+}
+.btn-veil-sm.edit {
+    color: var(--gold) !important;
+    background: transparent !important;
+    border: 0.5px solid rgba(201,168,76,0.3) !important;
+}
+.btn-veil-sm.edit:hover { border-color: var(--gold) !important; background: var(--gold-faint) !important; }
+.btn-veil-sm.danger {
+    color: #e07070 !important;
+    background: transparent !important;
+    border: 0.5px solid rgba(192,57,43,0.35) !important;
+}
+.btn-veil-sm.danger:hover { border-color: rgba(192,57,43,0.7) !important; background: rgba(192,57,43,0.08) !important; }
+.btn-veil-sm.back {
+    color: var(--cream-dim) !important;
+    background: transparent !important;
+    border: 0.5px solid rgba(201,168,76,0.18) !important;
+}
+.btn-veil-sm.back:hover { color: var(--cream) !important; border-color: rgba(201,168,76,0.4) !important; }
+
+/* ─── Alerts ─── */
+.veil-alert {
+    border-radius: 0 !important;
+    font-size: 0.82rem;
+    border-left-width: 3px !important;
+    background: transparent !important;
+}
+.veil-alert.success {
+    border-color: rgba(201,168,76,0.6) !important;
+    color: var(--gold) !important;
+    border-left-color: var(--gold) !important;
+}
+.veil-alert.error {
+    border-color: rgba(192,57,43,0.5) !important;
+    color: #e07070 !important;
+    border-left-color: rgba(192,57,43,0.8) !important;
+}
+.veil-alert.warning {
+    border-color: rgba(201,168,76,0.4) !important;
+    color: var(--cream-dim) !important;
+    border-left-color: var(--gold-dim) !important;
+}
+.btn-close { filter: invert(1) sepia(1) saturate(0.5); }
+
+/* ─── Badges ─── */
+.veil-badge {
+    font-size: 0.52rem !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    padding: 0.35em 0.75em !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 500 !important;
+}
+.veil-badge.active { background: var(--gold) !important; color: var(--black) !important; }
+.veil-badge.inactive { background: var(--charcoal) !important; color: var(--cream-dim) !important; border: 0.5px solid rgba(201,168,76,0.15); }
+
+/* ─── Table ─── */
+.veil-table {
+    color: var(--cream) !important;
+    border-color: rgba(201,168,76,0.1) !important;
+}
+.veil-table thead th {
+    background: var(--charcoal) !important;
+    color: var(--gold) !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.25em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    border-color: rgba(201,168,76,0.15) !important;
+    padding: 1rem 1.2rem !important;
+    font-family: 'Montserrat', sans-serif !important;
+}
+.veil-table tbody tr {
+    border-color: rgba(201,168,76,0.08) !important;
+    transition: background 0.2s;
+}
+.veil-table tbody tr:hover { background: rgba(201,168,76,0.04) !important; }
+.veil-table td {
+    color: var(--cream-dim) !important;
+    font-size: 0.83rem !important;
+    padding: 1rem 1.2rem !important;
+    border-color: rgba(201,168,76,0.08) !important;
+    vertical-align: middle !important;
+}
+.veil-table td a {
+    color: var(--cream) !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+.veil-table td a:hover { color: var(--gold) !important; }
+.veil-table.table-bordered { border-color: rgba(201,168,76,0.12) !important; }
+.veil-table th.table-light, .veil-table td.table-light {
+    background: rgba(201,168,76,0.06) !important;
+    color: var(--cream-dim) !important;
+}
+
+/* ─── Detail fields ─── */
+.veil-field-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    display: block;
+    margin-bottom: 0.3rem;
+}
+.veil-field-value {
+    font-size: 0.9rem;
+    color: var(--cream);
+}
+
+/* ─── Page hero strip ─── */
+.veil-page-hero {
+    padding: 3rem 0 2rem;
+    border-bottom: 0.5px solid rgba(201,168,76,0.12);
+    margin-bottom: 3rem;
+}
+
+/* ─── Footer ─── */
+.veil-footer {
+    background: var(--black-soft);
+    border-top: 0.5px solid rgba(201,168,76,0.1);
+    padding: 2rem 0;
+    margin-top: 5rem;
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* ─── Register page specific ─── */
+.veil-register-header {
+    margin-bottom: 2rem;
+}
+.veil-register-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--cream);
+    font-weight: 700;
+}
+.veil-register-header h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--cream-dim);
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
