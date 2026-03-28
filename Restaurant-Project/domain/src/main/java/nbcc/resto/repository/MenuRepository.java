@@ -14,4 +14,7 @@ public interface MenuRepository {
     // US3 - Update & Delete
     boolean existsByNameAndIdNot(String name, Long id);
     void deleteById(Long id);
+
+    // US6 - Search
+    List<Menu> searchByName(String name);
 }

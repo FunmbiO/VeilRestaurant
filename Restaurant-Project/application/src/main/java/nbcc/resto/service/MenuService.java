@@ -98,4 +98,14 @@ public class MenuService {
                 .orElseThrow(() -> new MenuNotFoundException(id));
         menuRepository.deleteById(id);
     }
+    // Search
+
+    @Transactional(readOnly = true)
+    public List<MenuDTO> searchMenus(String name) {
+        if (name == null || name.isBlank()) {
+            return getAllMenus();
+        }
+        return menuRepository.searchByName(name.trim())
+                .stream().map(MenuDTO::from).collect(Collectors.toList());
+    }
 }

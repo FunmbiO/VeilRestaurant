@@ -218,8 +218,11 @@
                             Item Name <span style="color:var(--gold);">*</span>
                         </label>
                         <input type="text" id="itemName" th:field="*{name}"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
                                class="form-control veil-input"
                                placeholder="e.g. Seared Scallops"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
+                             th:errors="*{name}"></div>
                     </div>
 
                     <div class="mb-3">
@@ -227,14 +230,16 @@
                             Description <span style="color:var(--gold);">*</span>
                         </label>
                         <textarea id="itemDescription" th:field="*{description}"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
                                   class="form-control veil-input" rows="2"
                                   placeholder="e.g. With cauliflower purée and crispy capers"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                             th:errors="*{description}"></div>
                     </div>
 
                     <button type="submit" class="btn btn-veil-primary">+ Add Item</button>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
