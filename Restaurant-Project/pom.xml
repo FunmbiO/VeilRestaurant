@@ -9,8 +9,10 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>application</module>
+        <module>common</module>
+        <module>auth</module>
         <module>domain</module>
+        <module>application</module>
         <module>persistence</module>
         <module>web</module>
         <module>app-web</module>
