@@ -90,7 +90,7 @@
         </div>
         <div class="d-flex flex-column align-items-end gap-2">
             <p class="text-end d-none d-md-block">Curated collections for each evening.<br>Each menu tells a different story.</p>
-            <a href="/menus/new" class="btn btn-veil-primary">+ Create Menu</a>
+            <a th:if="${isLoggedIn}" href="/menus/new" class="btn btn-veil-primary">+ Create Menu</a>
         </div>
     </div>
 </div>
@@ -164,14 +164,22 @@
             <div class="menu-item">
                 <div class="menu-item-left">
                     <span class="menu-item-num" th:text="${iter.count}"></span>
-                    <a th:href="@{/menus/{id}(id=${menu.id})}"
-                       th:text="${menu.name}"
-                       class="menu-item-name"></a>
+                    <div class="d-flex flex-column">
+                        <a th:href="@{/menus/{id}(id=${menu.id})}"
+                           th:text="${menu.name}"
+                           class="menu-item-name"></a>
+                        <span style="font-size:0.6rem; letter-spacing:0.1em; color:var(--cream-dim); text-transform:uppercase;"
+                              th:if="${menu.createdByUsername != null}">
+        By <span th:text="${menu.createdByUsername}" style="color:var(--gold);"></span>
+    </span>
+                    </div>
                 </div>
                 <div class="menu-item-actions">
-                    <a th:href="@{/menus/{id}/edit(id=${menu.id})}"
+                    <a th:if="${isLoggedIn and (isAdmin or menu.createdBy == currentUserId)}"
+                       th:href="@{/menus/{id}/edit(id=${menu.id})}"
                        class="btn btn-veil-sm edit" title="Edit Menu">✎ Edit</a>
-                    <a th:href="@{/menus/{id}/delete(id=${menu.id})}"
+                    <a th:if="${isLoggedIn and (isAdmin or menu.createdBy == currentUserId)}"
+                       th:href="@{/menus/{id}/delete(id=${menu.id})}"
                        class="btn btn-veil-sm danger" title="Delete Menu">⊘ Delete</a>
                 </div>
             </div>

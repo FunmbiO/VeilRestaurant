@@ -27,6 +27,12 @@ public class UserLoginEntity {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean locked;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isAdmin = false;
+
+    public boolean isAdmin() { return isAdmin; }
+    public UserLoginEntity setAdmin(boolean isAdmin) { this.isAdmin = isAdmin; return this; }
+
     public UserLoginEntity() {
         enabled = true;
         locked = false;

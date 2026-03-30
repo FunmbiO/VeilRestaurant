@@ -127,13 +127,27 @@
                         ◈ No menu assigned
                     </span>
                 </div>
+                <!-- Add after the menu tag div -->
+                <div class="mt-2">
+                    <span style="font-size:0.6rem; letter-spacing:0.12em; color:var(--cream-dim); text-transform:uppercase;">
+                        By <span th:text="${event.createdByUsername != null ? event.createdByUsername : '[Deleted User]'}"
+                 style="color:var(--gold);"></span>
+                </span>
+                </div>
             </div>
             <div class="text-end">
                 <div class="detail-price-badge" th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></div>
                 <div style="font-size:0.6rem; letter-spacing:0.12em; color:var(--cream-dim); text-transform:uppercase;">per person</div>
                 <div class="d-flex gap-2 mt-3 justify-content-end">
-                    <a th:href="@{/events/{id}/edit(id=${event.id})}" class="btn btn-veil-sm edit">✎ Edit</a>
-                    <a th:href="@{/events/{id}/delete(id=${event.id})}" class="btn btn-veil-sm danger">⊘ Delete</a>
+                    <a th:if="${canSuggest}"
+                       th:href="@{/events/{id}/suggest(id=${event.id})}"
+                       class="btn btn-veil-sm">✦ Suggest</a>
+                    <a th:if="${canEdit}"
+                       th:href="@{/events/{id}/edit(id=${event.id})}"
+                       class="btn btn-veil-sm edit">✎ Edit</a>
+                    <a th:if="${canEdit}"
+                       th:href="@{/events/{id}/delete(id=${event.id})}"
+                       class="btn btn-veil-sm danger">⊘ Delete</a>
                 </div>
             </div>
         </div>
@@ -183,6 +197,12 @@
                           th:text="${event.menuName}"></span>
                     <span class="veil-field-value" style="color:var(--cream-dim); font-style:italic;"
                           th:unless="${event.menuName != null}">No menu assigned</span>
+                </div>
+                <!-- Created By -->
+                <div class="info-cell full-width">
+                    <span class="veil-field-label">Created By</span>
+                    <span class="veil-field-value"
+                          th:text="${event.createdByUsername != null ? event.createdByUsername : '[Deleted User]'}"></span>
                 </div>
             </div>
 

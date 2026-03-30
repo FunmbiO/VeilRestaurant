@@ -16,6 +16,8 @@ public class Event {
     private Long menuId;           // US2 - nullable, links to Menu
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private Long createdBy;        // add with other fields
+    private String createdByUsername; // for display only
 
     public Event() {}
 
@@ -31,6 +33,7 @@ public class Event {
         this.active = active;
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
+        // createdBy set separately by service
     }
 
     public boolean isDateRangeValid() {
@@ -71,4 +74,8 @@ public class Event {
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public String getCreatedByUsername() { return createdByUsername; }
+    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
 }

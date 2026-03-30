@@ -81,6 +81,10 @@
     <div class="container">
         <span class="veil-eyebrow">Menu Detail</span>
         <h1 th:text="${menu.name}">Menu Name</h1>
+        <span style="font-size:0.6rem; letter-spacing:0.12em; color:var(--cream-dim); text-transform:uppercase;">
+    By <span th:text="${menu.createdByUsername != null ? menu.createdByUsername : '[Deleted User]'}"
+             style="color:var(--gold);"></span>
+</span>
     </div>
 </div>
 
@@ -115,7 +119,13 @@
             </div>
 
             <hr class="detail-rule"/>
-            <hr class="detail-rule"/>
+
+            <!-- Created By -->
+            <div class="detail-field">
+                <span class="veil-field-label">Created By</span>
+                <span class="veil-field-value"
+                      th:text="${menu.createdByUsername != null ? menu.createdByUsername : '[Deleted User]'}"></span>
+            </div>
 
             <!-- Menu Items -->
             <div class="detail-field">
@@ -150,6 +160,15 @@
 
         <div class="detail-panel-footer">
             <a href="/menus" class="btn btn-veil-sm back">← Back to Menus</a>
+            <a th:if="${canSuggest}"
+               th:href="@{/menus/{id}/suggest(id=${menu.id})}"
+               class="btn btn-veil-sm">✦ Suggest</a>
+            <a th:if="${canEdit}"
+               th:href="@{/menus/{id}/edit(id=${menu.id})}"
+               class="btn btn-veil-sm edit">✎ Edit</a>
+            <a th:if="${canEdit}"
+               th:href="@{/menus/{id}/delete(id=${menu.id})}"
+               class="btn btn-veil-sm danger">⊘ Delete</a>
         </div>
 
     </div>

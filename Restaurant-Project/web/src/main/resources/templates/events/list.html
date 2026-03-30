@@ -114,7 +114,7 @@
         </div>
         <div class="d-flex flex-column align-items-end gap-2">
             <p class="text-end d-none d-md-block">Intimate evenings in hidden venues.<br>Reserve your place before the world finds out.</p>
-            <a href="/events/new" class="btn btn-veil-primary">+ Create Event</a>
+            <a th:if="${isLoggedIn}" href="/events/new" class="btn btn-veil-primary">+ Create Event</a>
         </div>
     </div>
 </div>
@@ -220,6 +220,10 @@
                     <a th:href="@{/events/{id}(id=${event.id})}"
                        th:text="${event.name}"
                        class="event-card-name"></a>
+                    <span style="font-size:0.6rem; letter-spacing:0.1em; color:var(--cream-dim); text-transform:uppercase;"
+                          th:if="${event.createdByUsername != null}">
+    By <span th:text="${event.createdByUsername}" style="color:var(--gold);"></span>
+</span>
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <span th:if="${event.active}"    class="veil-badge badge active">Active</span>
                         <span th:unless="${event.active}" class="veil-badge badge inactive">Inactive</span>
@@ -231,9 +235,11 @@
                     <span class="event-price"
                           th:text="${'$' + #numbers.formatDecimal(event.price, 1, 2)}"></span>
                     <div class="event-actions">
-                        <a th:href="@{/events/{id}/edit(id=${event.id})}"
+                        <a th:if="${isLoggedIn and (isAdmin or event.createdBy == currentUserId)}"
+                           th:href="@{/events/{id}/edit(id=${event.id})}"
                            class="btn btn-veil-sm edit" title="Edit Event">✎ Edit</a>
-                        <a th:href="@{/events/{id}/delete(id=${event.id})}"
+                        <a th:if="${isLoggedIn and (isAdmin or event.createdBy == currentUserId)}"
+                           th:href="@{/events/{id}/delete(id=${event.id})}"
                            class="btn btn-veil-sm danger" title="Delete or Archive Event">⊘ Delete</a>
                     </div>
                 </div>

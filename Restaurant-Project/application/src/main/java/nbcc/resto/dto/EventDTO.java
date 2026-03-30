@@ -19,6 +19,8 @@ public class EventDTO {
     private String menuName;       // resolved by service for display
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private Long createdBy;
+    private String createdByUsername;
 
     public static EventDTO from(Event event) {
         EventDTO dto = new EventDTO();
@@ -33,6 +35,8 @@ public class EventDTO {
         dto.menuId = event.getMenuId();
         dto.createdDate = event.getCreatedDate();
         dto.updatedDate = event.getUpdatedDate();
+        dto.createdBy = event.getCreatedBy();
+        dto.createdByUsername = event.getCreatedByUsername();
         return dto;
     }
 
@@ -60,4 +64,8 @@ public class EventDTO {
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public String getCreatedByUsername() { return createdByUsername; }
+    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
 }

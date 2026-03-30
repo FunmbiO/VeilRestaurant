@@ -1,12 +1,14 @@
 package nbcc.resto.controller;
 
 import jakarta.validation.Valid;
+import nbcc.auth.security.AppUserDetails;
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
 import nbcc.resto.request.CreateEventWebRequest;
 import nbcc.resto.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +28,8 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventDTO> createEvent(@Valid @RequestBody CreateEventWebRequest webRequest) {
+    public ResponseEntity<EventDTO> createEvent(@Valid @RequestBody CreateEventWebRequest webRequest,
+                                                @AuthenticationPrincipal AppUserDetails currentUser) {
         CreateEventRequest req = new CreateEventRequest();
         req.setName(webRequest.getName());
         req.setDescription(webRequest.getDescription());
@@ -35,7 +38,8 @@ public class EventController {
         req.setDurationMinutes(webRequest.getDurationMinutes());
         req.setPrice(webRequest.getPrice());
         req.setActive(webRequest.isActive());
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(req));
+        Long createdBy = currentUser != null ? currentUser.getId() : null;
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(req, createdBy));
     }
 
     @GetMapping

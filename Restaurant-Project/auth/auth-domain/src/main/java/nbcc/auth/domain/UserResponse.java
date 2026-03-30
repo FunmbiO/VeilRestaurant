@@ -9,6 +9,10 @@ public class UserResponse implements Principal {
     private String email;
     private boolean enabled;
     private boolean locked;
+    private boolean isAdmin = false;
+
+    public boolean isAdmin() { return isAdmin; }
+    public UserResponse setAdmin(boolean isAdmin) { this.isAdmin = isAdmin; return this; }
 
     public UserResponse() {
         locked = false;

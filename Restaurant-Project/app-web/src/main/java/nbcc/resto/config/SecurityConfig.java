@@ -1,30 +1,36 @@
 package nbcc.resto.config;
 
+import nbcc.auth.security.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Spring Security configuration.
- *
- * Public routes:  /  /login  /register  (anyone can see home, login, register)
- * Protected routes: everything else requires login
- * Login page: /login
- * Logout: POST /logout -> redirects to /login
- * Post-login redirect: /events (the main feature page)
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final AppUserDetailsService appUserDetailsService;
+
+    public SecurityConfig(AppUserDetailsService appUserDetailsService) {
+        this.appUserDetailsService = appUserDetailsService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .userDetailsService(appUserDetailsService)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/videos/**",
-                                "/webjars/**").permitAll()
+                        .requestMatchers(
+                                "/", "/login", "/register",
+                                "/css/**", "/js/**", "/images/**",
+                                "/videos/**", "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/events", "/events/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/menus", "/menus/{id}").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -10,6 +10,8 @@ public class MenuDTO {
     private String name;
     private String description;
     private LocalDateTime createdDateTime;
+    private Long createdBy;
+    private String createdByUsername;
 
     public static MenuDTO from(Menu menu) {
         MenuDTO dto = new MenuDTO();
@@ -17,6 +19,8 @@ public class MenuDTO {
         dto.name            = menu.getName();
         dto.description     = menu.getDescription();
         dto.createdDateTime = menu.getCreatedDateTime();
+        dto.createdBy = menu.getCreatedBy();
+        dto.createdByUsername = menu.getCreatedByUsername();
         return dto;
     }
 
@@ -28,4 +32,8 @@ public class MenuDTO {
     public void setDescription(String description) { this.description = description; }
     public LocalDateTime getCreatedDateTime() { return createdDateTime; }
     public void setCreatedDateTime(LocalDateTime createdDateTime) { this.createdDateTime = createdDateTime; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public String getCreatedByUsername() { return createdByUsername; }
+    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
 }

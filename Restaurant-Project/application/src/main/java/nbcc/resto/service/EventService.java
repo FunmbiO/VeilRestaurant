@@ -1,5 +1,7 @@
 package nbcc.resto.service;
 
+import nbcc.auth.entity.UserLoginEntity;
+import nbcc.auth.repository.UserLoginJPARepository;
 import nbcc.resto.dto.CreateEventRequest;
 import nbcc.resto.dto.EventDTO;
 import nbcc.resto.dto.EventSearchCriteria;
@@ -8,6 +10,7 @@ import nbcc.resto.entity.Event;
 import nbcc.resto.exception.DuplicateEventNameException;
 import nbcc.resto.exception.EventNotFoundException;
 import nbcc.resto.exception.InvalidEventException;
+import nbcc.resto.exception.UnauthorizedException;
 import nbcc.resto.repository.EventRepository;
 import nbcc.resto.repository.MenuRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,16 +27,16 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final MenuRepository menuRepository;
+    private final UserLoginJPARepository userLoginJPARepository;
 
     public EventService(@Qualifier("eventRepositoryImpl") EventRepository eventRepository,
-                        MenuRepository menuRepository) {
-        this.eventRepository = eventRepository;
-        this.menuRepository  = menuRepository;
+                        MenuRepository menuRepository,
+                        UserLoginJPARepository userLoginJPARepository) {
+        this.eventRepository       = eventRepository;
+        this.menuRepository        = menuRepository;
+        this.userLoginJPARepository = userLoginJPARepository;
     }
 
-    // Helpers
-
-    /** Resolves menu name for display; safe if menuId is null or not found. */
     private String resolveMenuName(Long menuId) {
         if (menuId == null) return null;
         return menuRepository.findById(menuId)
@@ -40,36 +44,53 @@ public class EventService {
                 .orElse(null);
     }
 
+    private String resolveUsername(Long userId) {
+        if (userId == null) return null;
+        return userLoginJPARepository.findById(userId)
+                .map(UserLoginEntity::getUsername)
+                .orElse("[Deleted User]");
+    }
+
     private EventDTO toDTO(Event event) {
         EventDTO dto = EventDTO.from(event);
         dto.setMenuName(resolveMenuName(event.getMenuId()));
+        dto.setCreatedByUsername(resolveUsername(event.getCreatedBy()));
         return dto;
+    }
+
+    // Authorization
+
+    public void assertCanModify(Long eventId, Long currentUserId, boolean isAdmin) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+        if (!isAdmin && !Objects.equals(event.getCreatedBy(), currentUserId)) {
+            throw new UnauthorizedException("You do not have permission to modify this event.");
+        }
+    }
+
+    public boolean canModify(Long eventId, Long currentUserId, boolean isAdmin) {
+        if (isAdmin) return true;
+        return eventRepository.findById(eventId)
+                .map(e -> Objects.equals(e.getCreatedBy(), currentUserId))
+                .orElse(false);
     }
 
     // Create
 
     @Transactional
-    public EventDTO createEvent(CreateEventRequest request) {
-        if (request.getName() == null || request.getName().isBlank()) {
+    public EventDTO createEvent(CreateEventRequest request, Long createdBy) {
+        if (request.getName() == null || request.getName().isBlank())
             throw new InvalidEventException("Event name is required.");
-        }
-        if (request.getStartDate() == null) {
+        if (request.getStartDate() == null)
             throw new InvalidEventException("Start date is required.");
-        }
-        if (request.getEndDate() == null) {
+        if (request.getEndDate() == null)
             throw new InvalidEventException("End date is required.");
-        }
-        if (request.getPrice() == null) {
+        if (request.getPrice() == null)
             throw new InvalidEventException("Price is required.");
-        }
-        if (eventRepository.existsByName(request.getName())) {
+        if (eventRepository.existsByName(request.getName()))
             throw new DuplicateEventNameException(request.getName());
-        }
-
-        // US2 - cannot be active/live without a menu
-        if (request.isActive() && request.getMenuId() == null) {
+        if (request.isActive() && request.getMenuId() == null)
             throw new InvalidEventException("A menu must be selected before marking an event as active.");
-        }
 
         Event event = new Event(
                 request.getName(),
@@ -81,13 +102,12 @@ public class EventService {
                 request.isActive()
         );
         event.setMenuId(request.getMenuId());
+        event.setCreatedBy(createdBy);
 
-        if (!event.isDateRangeValid()) {
+        if (!event.isDateRangeValid())
             throw new InvalidEventException("End date must be on or after start date.");
-        }
-        if (!event.isPositiveValues()) {
+        if (!event.isPositiveValues())
             throw new InvalidEventException("Price and duration must be positive values.");
-        }
 
         event.setCreatedDate(LocalDateTime.now());
         event.setUpdatedDate(LocalDateTime.now());
@@ -121,7 +141,9 @@ public class EventService {
     }
 
     @Transactional
-    public boolean deleteOrArchiveEvent(Long id) {
+    public boolean deleteOrArchiveEvent(Long id, Long currentUserId, boolean isAdmin) {
+        assertCanModify(id, currentUserId, isAdmin);
+
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
 
@@ -141,42 +163,34 @@ public class EventService {
     // Update
 
     @Transactional
-    public EventDTO updateEvent(Long id, UpdateEventRequest request) {
+    public EventDTO updateEvent(Long id, UpdateEventRequest request, Long currentUserId, boolean isAdmin) {
+        assertCanModify(id, currentUserId, isAdmin);
+
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
 
-        if (request.getName() == null || request.getName().isBlank()) {
+        if (request.getName() == null || request.getName().isBlank())
             throw new InvalidEventException("Event name is required.");
-        }
-        if (request.getStartDate() == null) {
+        if (request.getStartDate() == null)
             throw new InvalidEventException("Start date is required.");
-        }
-        if (request.getEndDate() == null) {
+        if (request.getEndDate() == null)
             throw new InvalidEventException("End date is required.");
-        }
-        if (request.getPrice() == null) {
+        if (request.getPrice() == null)
             throw new InvalidEventException("Price is required.");
-        }
-        if (eventRepository.existsByNameAndIdNot(request.getName(), id)) {
+        if (eventRepository.existsByNameAndIdNot(request.getName(), id))
             throw new DuplicateEventNameException(request.getName());
-        }
-
-        // US2 - cannot be active/live without a menu
-        if (request.isActive() && request.getMenuId() == null) {
+        if (request.isActive() && request.getMenuId() == null)
             throw new InvalidEventException("A menu must be selected before marking an event as active.");
-        }
 
         Event temp = new Event(
                 request.getName(), request.getDescription(),
                 request.getStartDate(), request.getEndDate(),
                 request.getDurationMinutes(), request.getPrice(), request.isActive()
         );
-        if (!temp.isDateRangeValid()) {
+        if (!temp.isDateRangeValid())
             throw new InvalidEventException("End date must be on or after start date.");
-        }
-        if (!temp.isPositiveValues()) {
+        if (!temp.isPositiveValues())
             throw new InvalidEventException("Price and duration must be positive values.");
-        }
 
         event.setName(request.getName());
         event.setDescription(request.getDescription());
