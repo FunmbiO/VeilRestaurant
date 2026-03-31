@@ -19,6 +19,9 @@ public class MenuJpaEntity {
 
     @Column(nullable = false)
     private LocalDateTime createdDateTime;
+    @Column(nullable = true)
+    private Long createdBy;
+
 
     public MenuJpaEntity() {}
 
@@ -30,6 +33,7 @@ public class MenuJpaEntity {
         e.name            = menu.getName();
         e.description     = menu.getDescription();
         e.createdDateTime = menu.getCreatedDateTime();
+        e.createdBy = menu.getCreatedBy();
         return e;
     }
 
@@ -39,6 +43,7 @@ public class MenuJpaEntity {
         m.setName(name);
         m.setDescription(description);
         m.setCreatedDateTime(createdDateTime);
+        m.setCreatedBy(this.createdBy);
         return m;
     }
 
@@ -52,4 +57,6 @@ public class MenuJpaEntity {
     public void setDescription(String description) { this.description = description; }
     public LocalDateTime getCreatedDateTime() { return createdDateTime; }
     public void setCreatedDateTime(LocalDateTime createdDateTime) { this.createdDateTime = createdDateTime; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
 }

@@ -51,6 +51,8 @@ public class EventJpaEntity {
 
     @Column(nullable = false)
     private LocalDateTime updatedDate;
+    @Column(nullable = true)
+    private Long createdBy;
 
     @PrePersist
     public void prePersist() {
@@ -79,6 +81,7 @@ public class EventJpaEntity {
         event.setMenuId(this.menuId);
         event.setCreatedDate(this.createdDate);
         event.setUpdatedDate(this.updatedDate);
+        event.setCreatedBy(this.createdBy);
         return event;
     }
 
@@ -95,6 +98,7 @@ public class EventJpaEntity {
         entity.setMenuId(event.getMenuId());
         entity.setCreatedDate(event.getCreatedDate());
         entity.setUpdatedDate(event.getUpdatedDate());
+        entity.setCreatedBy(event.getCreatedBy());
         return entity;
     }
 
@@ -122,4 +126,6 @@ public class EventJpaEntity {
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
 }
