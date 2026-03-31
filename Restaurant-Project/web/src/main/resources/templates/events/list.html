@@ -101,7 +101,7 @@
         .event-actions { display: flex; gap: 0.5rem; align-items: center; }
     </style>
 </head>
-<body>
+<body class="admin-mode">
 
 <div th:replace="~{nav :: navbar}"></div>
 
@@ -222,7 +222,8 @@
                        class="event-card-name"></a>
                     <span style="font-size:0.6rem; letter-spacing:0.1em; color:var(--cream-dim); text-transform:uppercase;"
                           th:if="${event.createdByUsername != null}">
-    By <span th:text="${event.createdByUsername}" style="color:var(--gold);"></span>
+    By <span th:text="${event.createdBy == currentUserId ? event.createdByUsername + ' (You)' : event.createdByUsername}"
+             style="color:var(--gold);"></span>
 </span>
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <span th:if="${event.active}"    class="veil-badge badge active">Active</span>

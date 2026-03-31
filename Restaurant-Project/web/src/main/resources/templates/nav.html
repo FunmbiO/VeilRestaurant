@@ -1,57 +1,118 @@
 <!-- nav.html - NO DOCTYPE, NO html/body tags, just the fragment -->
-<nav th:fragment="navbar"
-     class="navbar navbar-expand-lg veil-nav"
-     xmlns:th="http://www.thymeleaf.org"
-     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <div class="container">
-        <a class="navbar-brand" href="/">Veil</a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/events">Events</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/menus">Menus</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/events/new">Create Event</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/menus/new">Create Menu</a>
-                </li>
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" href="/admin/portal">Admin Portal</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto align-items-center gap-2"
-                sec:authorize="!isAuthenticated()">
-                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
-                <li class="nav-item">
-                    <a href="/register" class="btn btn-nav-cta">Join Veil</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto align-items-center gap-2"
-                sec:authorize="isAuthenticated()">
-                <li class="nav-item">
+<th:block th:fragment="navbar" xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <div class="admin-mode-banner" sec:authorize="hasRole('ADMIN')">
+        <span>⬡ Admin Mode — you have full access to all content</span>
+    </div>
+
+    <nav class="navbar navbar-expand-lg veil-nav">
+        <div class="container">
+            <a class="navbar-brand" href="/">Veil</a>
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/events">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/menus">Menus</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/events/new">Create Event</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/menus/new">Create Menu</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/admin/portal">Admin Portal</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+                        <a class="nav-link" href="/inbox">
+                            Inbox
+                            <span th:if="${inboxCount > 0}"
+                                  style="background:var(--gold); color:#000; border-radius:999px;
+                                     font-size:0.6rem; padding:0.1rem 0.4rem; margin-left:0.3rem;"
+                                  th:text="${inboxCount}"></span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center gap-2"
+                    sec:authorize="!isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                    <li class="nav-item">
+                        <a href="/register" class="btn btn-nav-cta">Join Veil</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center gap-2"
+                    sec:authorize="isAuthenticated()">
+                    <li class="nav-item">
                     <span class="nav-link"
                           style="color: var(--cream-dim); font-size:0.72rem; letter-spacing:0.08em;">
                         Welcome, <strong sec:authentication="name"></strong>
+                        <span class="admin-badge" sec:authorize="hasRole('ADMIN')">⬡ Admin</span>
                     </span>
-                </li>
-                <li class="nav-item">
-                    <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit"
-                                class="btn btn-veil-ghost btn-veil-sm">Logout</button>
-                    </form>
-                </li>
-            </ul>
+                    </li>
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit"
+                                    class="btn btn-veil-ghost btn-veil-sm">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- US10 - Login notification popup -->
+    <div th:if="${inboxCount > 0 and param.loggedin != null}"
+         class="modal fade" id="inboxModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content"
+                 style="background:var(--off-black); border:0.5px solid rgba(201,168,76,0.3);">
+                <div class="modal-header"
+                     style="border-bottom:0.5px solid rgba(201,168,76,0.15);">
+                    <h5 class="modal-title"
+                        style="font-family:'Playfair Display',serif; color:var(--cream);">
+                        You have new suggestions
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="color:var(--cream-dim); font-size:0.9rem;">
+                    <p>You have
+                        <strong style="color:var(--gold);" th:text="${inboxCount}"></strong>
+                        unread suggestion<span th:if="${inboxCount > 1}">s</span>
+                        for your events and menus.
+                    </p>
+                </div>
+                <div class="modal-footer"
+                     style="border-top:0.5px solid rgba(201,168,76,0.15);">
+                    <button type="button" class="btn btn-veil-ghost btn-veil-sm"
+                            data-bs-dismiss="modal">Dismiss</button>
+                    <a href="/inbox" class="btn btn-veil-primary">View Inbox</a>
+                </div>
+            </div>
         </div>
     </div>
-</nav>
+
+    <script>
+        (function waitForBootstrap() {
+            if (typeof bootstrap !== 'undefined') {
+                const modal = document.getElementById('inboxModal');
+                if (modal) {
+                    new bootstrap.Modal(modal).show();
+                }
+            } else {
+                setTimeout(waitForBootstrap, 50);
+            }
+        })();
+    </script>
+
+</th:block>

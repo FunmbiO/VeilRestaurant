@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Give Suggestion — Veil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/veil.css"/>
+</head>
+<body class="admin-mode">
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<div class="container py-5" style="max-width:640px;">
+    <span class="veil-eyebrow">Feedback</span>
+    <h1 style="font-family:'Playfair Display',serif; color:var(--cream); font-size:2rem;">
+        Give a Suggestion
+    </h1>
+
+    <div th:if="${errorMessage}"
+         class="alert veil-alert error alert-dismissible fade show mt-3" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form th:action="@{/suggestions}" method="post" class="mt-4">
+        <input type="hidden" name="targetType" th:value="${targetType}"/>
+        <input type="hidden" name="targetId"   th:value="${targetId}"/>
+
+        <div class="mb-4">
+            <label class="veil-label" for="suggestionText">Your Suggestion</label>
+            <textarea id="suggestionText"
+                      name="suggestionText"
+                      class="form-control veil-input"
+                      rows="6"
+                      maxlength="1000"
+                      placeholder="Describe your suggestion in detail…"
+                      required></textarea>
+            <div style="font-size:0.7rem; color:var(--cream-dim); margin-top:0.4rem;">
+                Max 1000 characters
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="veil-label">Priority</label>
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" name="priority" value="HIGH"
+                        class="btn btn-veil-sm danger">▲ High Priority</button>
+                <button type="submit" name="priority" value="NORMAL"
+                        class="btn btn-veil-sm edit">● Priority</button>
+                <button type="submit" name="priority" value="LOW"
+                        class="btn btn-veil-sm back">▼ Low Priority</button>
+            </div>
+            <div style="font-size:0.7rem; color:var(--cream-dim); margin-top:0.5rem;">
+                Select a priority to submit your suggestion.
+            </div>
+        </div>
+    </form>
+
+    <a th:href="${targetType == 'EVENT' ? '/events/' + targetId : '/menus/' + targetId}"
+       class="btn btn-veil-ghost btn-veil-sm mt-2">← Cancel</a>
+</div>
+
+<footer class="veil-footer">
+    <div class="container">© 2025 Veil. All rights reserved.</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

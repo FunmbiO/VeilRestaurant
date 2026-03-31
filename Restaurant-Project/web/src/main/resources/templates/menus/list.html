@@ -78,7 +78,7 @@
         .empty-state p { font-size: 0.85rem; color: var(--cream-dim); margin-bottom: 1.5rem; }
     </style>
 </head>
-<body>
+<body class="admin-mode">
 
 <div th:replace="~{nav :: navbar}"></div>
 
@@ -170,8 +170,9 @@
                            class="menu-item-name"></a>
                         <span style="font-size:0.6rem; letter-spacing:0.1em; color:var(--cream-dim); text-transform:uppercase;"
                               th:if="${menu.createdByUsername != null}">
-        By <span th:text="${menu.createdByUsername}" style="color:var(--gold);"></span>
-    </span>
+    By <span th:text="${menu.createdBy == currentUserId ? menu.createdByUsername + ' (You)' : menu.createdByUsername}"
+             style="color:var(--gold);"></span>
+</span>
                     </div>
                 </div>
                 <div class="menu-item-actions">

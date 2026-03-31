@@ -78,7 +78,7 @@
         }
     </style>
 </head>
-<body>
+<body class="admin-mode">
 
 <div th:replace="~{nav :: navbar}"></div>
 
@@ -202,7 +202,7 @@
                 <div class="info-cell full-width">
                     <span class="veil-field-label">Created By</span>
                     <span class="veil-field-value"
-                          th:text="${event.createdByUsername != null ? event.createdByUsername : '[Deleted User]'}"></span>
+                          th:text="${event.createdBy == currentUserId ? event.createdByUsername + ' (You)' : (event.createdByUsername != null ? event.createdByUsername : '[Deleted User]')}"></span>
                 </div>
             </div>
 

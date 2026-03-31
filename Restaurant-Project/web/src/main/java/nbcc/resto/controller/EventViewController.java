@@ -68,7 +68,7 @@ public class EventViewController {
             boolean isCreator = currentUser != null
                     && Objects.equals(event.getCreatedBy(), currentUser.getId());
             boolean canEdit    = isAdmin || isCreator;
-            boolean canSuggest = currentUser != null && !isCreator;
+            boolean canSuggest = currentUser != null && !isCreator && !isAdmin;
 
             model.addAttribute("event", event);
             model.addAttribute("canEdit", canEdit);

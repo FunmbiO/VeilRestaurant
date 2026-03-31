@@ -72,7 +72,7 @@
         }
     </style>
 </head>
-<body>
+<body class="admin-mode">
 
 <div th:replace="~{nav :: navbar}"></div>
 
@@ -124,7 +124,7 @@
             <div class="detail-field">
                 <span class="veil-field-label">Created By</span>
                 <span class="veil-field-value"
-                      th:text="${menu.createdByUsername != null ? menu.createdByUsername : '[Deleted User]'}"></span>
+                      th:text="${menu.createdBy == currentUserId ? menu.createdByUsername + ' (You)' : (menu.createdByUsername != null ? menu.createdByUsername : '[Deleted User]')}"></span>
             </div>
 
             <!-- Menu Items -->

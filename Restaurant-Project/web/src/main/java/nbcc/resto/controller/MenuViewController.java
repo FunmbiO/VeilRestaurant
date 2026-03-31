@@ -58,7 +58,7 @@ public class MenuViewController {
             boolean isCreator = currentUser != null
                     && Objects.equals(menu.getCreatedBy(), currentUser.getId());
             boolean canEdit    = isAdmin || isCreator;
-            boolean canSuggest = currentUser != null && !isCreator;
+            boolean canSuggest = currentUser != null && !isCreator && !isAdmin;
 
             model.addAttribute("menu", menu);
             model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));
