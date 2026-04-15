@@ -117,9 +117,27 @@
             </div>
 
         </div>
-
         <div class="confirm-panel-footer">
             <form th:action="@{/menus/{id}/delete(id=${menu.id})}" method="post">
+                <!-- Reason field - only shown to admin deleting others' content -->
+                <div th:if="${isAdmin and menu.createdBy != currentUserId}" class="mb-3">
+                    <label class="veil-label" for="reason">
+                        Reason for Deletion <span style="color:#dc2626;">*</span>
+                    </label>
+                    <textarea id="reason"
+                              name="reason"
+                              class="form-control veil-input"
+                              rows="3"
+                              th:classappend="${reasonRequired == true} ? ' is-invalid' : ''"
+                              placeholder="Provide a reason for deleting this content…"></textarea>
+                    <div th:if="${reasonRequired == true}"
+                         style="color:#dc2626; font-size:0.75rem; margin-top:0.4rem;">
+                        A reason is required when deleting another user's content.
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--cream-dim); margin-top:0.3rem;">
+                        The original creator will be notified by email with your reason.
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-veil-danger">⊘ Confirm Delete</button>
             </form>
             <a th:href="@{/menus/{id}(id=${menu.id})}" class="btn btn-veil-ghost">Cancel</a>

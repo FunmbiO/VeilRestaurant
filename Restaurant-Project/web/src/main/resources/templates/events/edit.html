@@ -179,6 +179,25 @@
                                 </div>
                                 <div class="form-text">Active events are visible to guests. Requires a menu.</div>
                             </div>
+                            <!-- Reason field - only shown to admin editing others' content -->
+                            <div th:if="${isAdmin and event.createdBy != currentUserId}" class="mb-3">
+                                <label class="veil-label" for="reason">
+                                    Reason for Edit <span style="color:#dc2626;">*</span>
+                                </label>
+                                <textarea id="reason"
+                                          name="reason"
+                                          class="form-control veil-input"
+                                          rows="3"
+                                          th:classappend="${reasonRequired} ? ' is-invalid' : ''"
+                                          placeholder="Provide a reason for editing this content…"
+                                          required></textarea>
+                                <div class="invalid-feedback" th:if="${reasonRequired}">
+                                    A reason is required when editing another user's content.
+                                </div>
+                                <div style="font-size:0.7rem; color:var(--cream-dim); margin-top:0.3rem;">
+                                    The original creator will be notified by email with your reason.
+                                </div>
+                            </div>
 
                             <!-- Actions -->
                             <div class="d-flex gap-2 pt-2">
