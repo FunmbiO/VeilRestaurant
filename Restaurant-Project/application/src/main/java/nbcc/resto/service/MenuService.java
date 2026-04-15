@@ -27,13 +27,16 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final EventRepository eventRepository;
     private final UserLoginJPARepository userLoginJPARepository;
+    private final EmailService emailService;
 
     public MenuService(MenuRepository menuRepository,
                        EventRepository eventRepository,
-                       UserLoginJPARepository userLoginJPARepository) {
+                       UserLoginJPARepository userLoginJPARepository,
+                       EmailService emailService) {
         this.menuRepository         = menuRepository;
         this.eventRepository        = eventRepository;
         this.userLoginJPARepository = userLoginJPARepository;
+        this.emailService           = emailService;
     }
 
     // Helpers
@@ -105,11 +108,26 @@ public class MenuService {
 
     @Transactional
     public MenuDTO updateMenu(Long id, @Valid UpdateMenuRequest request,
-                              Long currentUserId, boolean isAdmin) {
+                              Long currentUserId, boolean isAdmin, String reason) {
         assertCanModify(id, currentUserId, isAdmin);
 
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new MenuNotFoundException(id));
+        if (isAdmin && !Objects.equals(menu.getCreatedBy(), currentUserId)
+                && menu.getCreatedBy() != null) {
+            userLoginJPARepository.findById(menu.getCreatedBy()).ifPresent(creator -> {
+                userLoginJPARepository.findById(currentUserId).ifPresent(admin -> {
+                    emailService.sendAdminEditNotification(
+                            creator.getEmail(),
+                            creator.getUsername(),
+                            admin.getUsername(),
+                            "menu",
+                            menu.getName(),
+                            reason
+                    );
+                });
+            });
+        }
 
         if (request.getName() == null || request.getName().isBlank())
             throw new InvalidEventException("Menu name is required.");
@@ -133,10 +151,27 @@ public class MenuService {
     }
 
     @Transactional
-    public void deleteMenu(Long id, Long currentUserId, boolean isAdmin) {
+    public void deleteMenu(Long id, Long currentUserId, boolean isAdmin, String reason) {
         assertCanModify(id, currentUserId, isAdmin);
-        menuRepository.findById(id)
+        Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new MenuNotFoundException(id));
+
+        if (isAdmin && !Objects.equals(menu.getCreatedBy(), currentUserId)
+                && menu.getCreatedBy() != null) {
+            userLoginJPARepository.findById(menu.getCreatedBy()).ifPresent(creator -> {
+                userLoginJPARepository.findById(currentUserId).ifPresent(admin -> {
+                    emailService.sendAdminDeleteNotification(
+                            creator.getEmail(),
+                            creator.getUsername(),
+                            admin.getUsername(),
+                            "menu",
+                            menu.getName(),
+                            reason
+                    );
+                });
+            });
+        }
+
         menuRepository.deleteById(id);
     }
 

@@ -28,15 +28,17 @@ public class EventService {
     private final EventRepository eventRepository;
     private final MenuRepository menuRepository;
     private final UserLoginJPARepository userLoginJPARepository;
+    private final EmailService emailService;
 
     public EventService(@Qualifier("eventRepositoryImpl") EventRepository eventRepository,
                         MenuRepository menuRepository,
-                        UserLoginJPARepository userLoginJPARepository) {
-        this.eventRepository       = eventRepository;
-        this.menuRepository        = menuRepository;
+                        UserLoginJPARepository userLoginJPARepository,
+                        EmailService emailService) {
+        this.eventRepository        = eventRepository;
+        this.menuRepository         = menuRepository;
         this.userLoginJPARepository = userLoginJPARepository;
+        this.emailService           = emailService;
     }
-
     private String resolveMenuName(Long menuId) {
         if (menuId == null) return null;
         return menuRepository.findById(menuId)
@@ -141,13 +143,29 @@ public class EventService {
     }
 
     @Transactional
-    public boolean deleteOrArchiveEvent(Long id, Long currentUserId, boolean isAdmin) {
+    public boolean deleteOrArchiveEvent(Long id, Long currentUserId, boolean isAdmin, String reason) {
         assertCanModify(id, currentUserId, isAdmin);
 
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
 
         boolean isPast = event.getEndDate().isBefore(LocalDateTime.now());
+        // Send email if admin is deleting someone else's content
+        if (isAdmin && !Objects.equals(event.getCreatedBy(), currentUserId)
+                && event.getCreatedBy() != null) {
+            userLoginJPARepository.findById(event.getCreatedBy()).ifPresent(creator -> {
+                userLoginJPARepository.findById(currentUserId).ifPresent(admin -> {
+                    emailService.sendAdminDeleteNotification(
+                            creator.getEmail(),
+                            creator.getUsername(),
+                            admin.getUsername(),
+                            "event",
+                            event.getName(),
+                            reason
+                    );
+                });
+            });
+        }
 
         if (isPast) {
             event.setActive(false);
@@ -163,11 +181,27 @@ public class EventService {
     // Update
 
     @Transactional
-    public EventDTO updateEvent(Long id, UpdateEventRequest request, Long currentUserId, boolean isAdmin) {
+    public EventDTO updateEvent(Long id, UpdateEventRequest request, Long currentUserId, boolean isAdmin, String reason) {
         assertCanModify(id, currentUserId, isAdmin);
 
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
+        // Send email if admin is editing someone else's content
+        if (isAdmin && !Objects.equals(event.getCreatedBy(), currentUserId)
+                && event.getCreatedBy() != null) {
+            userLoginJPARepository.findById(event.getCreatedBy()).ifPresent(creator -> {
+                userLoginJPARepository.findById(currentUserId).ifPresent(admin -> {
+                    emailService.sendAdminEditNotification(
+                            creator.getEmail(),
+                            creator.getUsername(),
+                            admin.getUsername(),
+                            "event",
+                            event.getName(),
+                            reason
+                    );
+                });
+            });
+        }
 
         if (request.getName() == null || request.getName().isBlank())
             throw new InvalidEventException("Event name is required.");
