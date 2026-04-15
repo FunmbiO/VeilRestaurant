@@ -13,12 +13,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/events")
@@ -29,7 +27,7 @@ public class EventWebController {
 
     public EventWebController(EventService eventService, MenuService menuService) {
         this.eventService = eventService;
-        this.menuService  = menuService;
+        this.menuService = menuService;
     }
 
     // DELETE CONFIRM  GET /events/{id}/delete
@@ -58,17 +56,31 @@ public class EventWebController {
     // DELETE SUBMIT  POST /events/{id}/delete
     @PostMapping("/{id}/delete")
     public String deleteEvent(@PathVariable Long id,
+                              @RequestParam(required = false) String reason,
                               @AuthenticationPrincipal AppUserDetails currentUser,
+                              Model model,
                               RedirectAttributes redirectAttributes) {
         try {
             boolean isAdmin = currentUser != null && currentUser.isAdmin();
             Long userId = currentUser != null ? currentUser.getId() : null;
-            boolean wasArchived = eventService.deleteOrArchiveEvent(id, userId, isAdmin);
 
+            EventDTO event = eventService.getEventById(id);
+            boolean isOthersContent = isAdmin
+                    && !Objects.equals(event.getCreatedBy(), userId);
+
+            if (isOthersContent && (reason == null || reason.isBlank())) {
+                model.addAttribute("event", event);
+                model.addAttribute("willBeArchived", eventService.isEventInPast(id));
+                model.addAttribute("reasonRequired", true);
+                model.addAttribute("errorMessage",
+                        "A reason is required when deleting another user's content.");
+                return "events/delete";
+            }
+
+            boolean wasArchived = eventService.deleteOrArchiveEvent(id, userId, isAdmin,
+                    reason != null ? reason : "");
             redirectAttributes.addFlashAttribute("successMessage",
-                    wasArchived
-                            ? "The event has been archived and is no longer visible to guests."
-                            : "The event has been successfully deleted.");
+                    wasArchived ? "The event has been archived." : "The event has been deleted.");
             return "redirect:/events";
 
         } catch (UnauthorizedException e) {
@@ -80,7 +92,7 @@ public class EventWebController {
             return "redirect:/events";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "An error occurred while deleting the event. Please try again.");
+                    "An error occurred. Please try again.");
             return "redirect:/events";
         }
     }
@@ -124,6 +136,7 @@ public class EventWebController {
     public String updateEvent(@PathVariable Long id,
                               @Valid @ModelAttribute("formRequest") UpdateEventWebRequest formRequest,
                               BindingResult bindingResult,
+                              @RequestParam(required = false) String reason,
                               @AuthenticationPrincipal AppUserDetails currentUser,
                               Model model,
                               RedirectAttributes redirectAttributes) {
@@ -131,13 +144,29 @@ public class EventWebController {
         boolean isAdmin = currentUser != null && currentUser.isAdmin();
         Long userId = currentUser != null ? currentUser.getId() : null;
 
+        // Validate reason if admin editing someone else's content
+        EventDTO existingEvent = null;
+        try {
+            existingEvent = eventService.getEventById(id);
+        } catch (EventNotFoundException e) {
+            return "redirect:/events?error=notfound";
+        }
+
+        boolean isOthersContent = isAdmin
+                && !Objects.equals(existingEvent.getCreatedBy(), userId);
+
+        if (isOthersContent && (reason == null || reason.isBlank())) {
+            model.addAttribute("event", existingEvent);
+            model.addAttribute("formRequest", formRequest);
+            model.addAttribute("menus", menuService.getAllMenus());
+            model.addAttribute("reasonRequired", true);
+            model.addAttribute("errorMessage", "A reason is required when editing another user's content.");
+            return "events/edit";
+        }
+
         if (bindingResult.hasErrors()) {
-            try {
-                model.addAttribute("event", eventService.getEventById(id));
-                model.addAttribute("menus", menuService.getAllMenus());
-            } catch (EventNotFoundException e) {
-                return "redirect:/events?error=notfound";
-            }
+            model.addAttribute("event", existingEvent);
+            model.addAttribute("menus", menuService.getAllMenus());
             return "events/edit";
         }
 
@@ -152,7 +181,8 @@ public class EventWebController {
             req.setActive(formRequest.isActive());
             req.setMenuId(formRequest.getMenuId());
 
-            eventService.updateEvent(id, req, userId, isAdmin);
+            eventService.updateEvent(id, req, userId, isAdmin,
+                    reason != null ? reason : "");
             redirectAttributes.addFlashAttribute("successMessage", "Event updated successfully.");
             return "redirect:/events/" + id;
 
@@ -165,12 +195,8 @@ public class EventWebController {
             return "redirect:/events";
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
-            try {
-                model.addAttribute("event", eventService.getEventById(id));
-                model.addAttribute("menus", menuService.getAllMenus());
-            } catch (EventNotFoundException notFound) {
-                return "redirect:/events?error=notfound";
-            }
+            model.addAttribute("event", existingEvent);
+            model.addAttribute("menus", menuService.getAllMenus());
             return "events/edit";
         }
     }

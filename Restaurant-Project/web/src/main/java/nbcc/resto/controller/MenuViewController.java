@@ -135,11 +135,30 @@ public class MenuViewController {
             @Valid @ModelAttribute("formRequest") UpdateMenuRequest formRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal AppUserDetails currentUser,
+            @RequestParam(required = false) String reason,
             Model model,
             RedirectAttributes redirectAttributes) {
 
         boolean isAdmin = currentUser != null && currentUser.isAdmin();
         Long userId = currentUser != null ? currentUser.getId() : null;
+
+        MenuDTO existingMenu = null;
+        try { existingMenu = menuService.getMenuById(id); }
+        catch (MenuNotFoundException e) { return "redirect:/menus"; }
+
+        boolean isOthersContent = isAdmin
+                && !Objects.equals(existingMenu.getCreatedBy(), userId);
+
+        if (isOthersContent && (reason == null || reason.isBlank())) {
+            model.addAttribute("menu", existingMenu);
+            model.addAttribute("formRequest", formRequest);
+            model.addAttribute("menuItems", menuItemService.getItemsByMenuId(id));
+            model.addAttribute("newMenuItem", new CreateMenuItemRequest());
+            model.addAttribute("reasonRequired", true);
+            model.addAttribute("errorMessage",
+                    "A reason is required when editing another user's content.");
+            return "menus/edit";
+        }
 
         if (bindingResult.hasErrors()) {
             try {
@@ -154,7 +173,7 @@ public class MenuViewController {
         }
 
         try {
-            menuService.updateMenu(id, formRequest, userId, isAdmin);
+            menuService.updateMenu(id, formRequest, userId, isAdmin, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Menu updated successfully.");
             return "redirect:/menus/" + id;
 
@@ -355,6 +374,7 @@ public class MenuViewController {
             List<String> associatedEvents = menuService.getAssociatedEventNames(id);
             model.addAttribute("menu", menu);
             model.addAttribute("associatedEvents", associatedEvents);
+            model.addAttribute("reasonRequired", false); // ADD THIS
             return "menus/delete";
 
         } catch (UnauthorizedException e) {
@@ -368,11 +388,28 @@ public class MenuViewController {
     @PostMapping("/menus/{id}/delete")
     public String confirmDelete(@PathVariable Long id,
                                 @AuthenticationPrincipal AppUserDetails currentUser,
+                                @RequestParam(required = false) String reason,
+                                Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
             boolean isAdmin = currentUser != null && currentUser.isAdmin();
             Long userId = currentUser != null ? currentUser.getId() : null;
-            menuService.deleteMenu(id, userId, isAdmin);
+
+            MenuDTO existingMenu = menuService.getMenuById(id);
+            boolean isOthersContent = isAdmin
+                    && !Objects.equals(existingMenu.getCreatedBy(), userId);
+
+            if (isOthersContent && (reason == null || reason.isBlank())) {
+                List<String> associatedEvents = menuService.getAssociatedEventNames(id);
+                model.addAttribute("menu", existingMenu);
+                model.addAttribute("associatedEvents", associatedEvents);
+                model.addAttribute("reasonRequired", true);
+                model.addAttribute("errorMessage",
+                        "A reason is required when deleting another user's content.");
+                return "menus/delete";
+            }
+
+            menuService.deleteMenu(id, userId, isAdmin, reason != null ? reason : "");
             redirectAttributes.addFlashAttribute("successMessage", "Menu deleted successfully.");
 
         } catch (UnauthorizedException e) {
